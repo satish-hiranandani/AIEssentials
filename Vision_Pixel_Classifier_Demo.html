@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vision AI: Draw a Shape, Watch AI Guess</title>
+<style>
+  :root{
+    --ink:#12123A; --primary:#4338CA; --accent:#06B6D4; --mint:#10B981;
+    --amber:#F59E0B; --coral:#F43F5E; --violet:#8B5CF6;
+    --light:#F4F5FB; --card:#FFFFFF; --text:#1F2937; --muted:#6B7280; --line:#E2E4F0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--light);color:var(--text);
+    font-family:Calibri,'Segoe UI',system-ui,Arial,sans-serif;line-height:1.45}
+  .wrap{max-width:1040px;margin:0 auto;padding:24px 18px 60px}
+  header.hero{background:var(--ink);color:#fff;border-radius:18px;padding:30px 32px;position:relative;overflow:hidden}
+  header.hero h1{margin:0 0 6px;font-family:'Trebuchet MS',sans-serif;font-size:30px}
+  header.hero p{margin:0;color:#C7CBE8;font-size:17px;max-width:780px}
+  .pill{display:inline-block;background:rgba(255,255,255,.12);color:#CFFAFE;font-size:12px;font-weight:bold;
+    padding:5px 12px;border-radius:20px;margin-bottom:14px;letter-spacing:.5px}
+  .ring{position:absolute;border-radius:50%;opacity:.18}
+  .r1{width:230px;height:230px;background:var(--accent);right:-50px;top:-70px}
+  .r2{width:120px;height:120px;background:var(--mint);right:120px;top:80px;opacity:.25}
+  section.card{background:var(--card);border-radius:16px;padding:24px 26px;margin-top:22px;box-shadow:0 6px 22px rgba(31,41,55,.07)}
+  h2{font-family:'Trebuchet MS',sans-serif;color:var(--ink);font-size:23px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  h2 .dot{width:14px;height:26px;border-radius:4px;background:var(--accent);display:inline-block}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 18px}
+  .lab{font-weight:bold;color:var(--ink);font-size:14px;margin:0 0 8px}
+  .main{display:flex;gap:30px;flex-wrap:wrap}
+  .left{flex:0 0 auto}
+  .right{flex:1;min-width:280px}
+  #grid{display:grid;grid-template-columns:repeat(7,46px);grid-template-rows:repeat(7,46px);gap:3px;
+    background:#DfE2F0;padding:6px;border-radius:12px;touch-action:none;user-select:none}
+  .cell{background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:bold;color:#C2C7DD;cursor:crosshair;transition:background .05s}
+  .cell.on{background:var(--ink);color:#fff}
+  .grid-wrap.nums .cell{color:#AEB4D0}
+  .grid-wrap:not(.nums) .cell{color:transparent}
+  .guess{font-family:'Trebuchet MS',sans-serif;font-size:20px;color:var(--ink);margin:0 0 10px}
+  .guess b{font-size:30px;color:var(--mint)}
+  .candidate{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .candidate .w{width:54px;font-weight:bold;color:var(--ink);font-size:18px;text-align:right;flex:none}
+  .candidate .track{flex:1;background:#EBEDF7;border-radius:8px;height:24px;overflow:hidden}
+  .candidate .fill{height:100%;border-radius:8px;min-width:4px}
+  .candidate .pct{width:50px;font-weight:bold;flex:none}
+  .controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;align-items:center}
+  button{font-family:inherit;font-size:14px;font-weight:bold;border:none;border-radius:10px;padding:10px 14px;cursor:pointer;color:#fff;transition:.12s}
+  button:hover{filter:brightness(1.07)} button:active{transform:translateY(1px)}
+  .b-clear{background:#E7E9F5;color:var(--ink)} .b-tog{background:var(--primary)}
+  .stencils{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;align-items:center}
+  .chip{background:#E6FBF8;color:#0B7C8C;border:1px solid #BfeDe6;border-radius:18px;padding:7px 13px;font-weight:bold;font-size:14px;cursor:pointer}
+  .chip:hover{background:var(--accent);color:#fff}
+  details.hood{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:6px 14px;background:#FBFBFE}
+  details.hood summary{cursor:pointer;font-weight:bold;color:var(--primary);padding:8px 0}
+  .hoodbody{font-size:14.5px;padding:4px 0 12px}
+  .hoodbody code{background:#EEF0FB;border-radius:5px;padding:1px 7px;color:var(--ink);font-weight:bold}
+  .note{background:#FFF7E6;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;font-size:14.5px;margin-top:14px}
+  ul.tp{margin:6px 0 0;padding-left:22px} ul.tp li{margin:7px 0;font-size:15px}
+  .foot{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+  @media(max-width:560px){#grid{grid-template-columns:repeat(7,38px);grid-template-rows:repeat(7,38px)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="ring r1"></span><span class="ring r2"></span>
+    <span class="pill">WEEK 4 - VISION AI - LIVE DEMO</span>
+    <h1>Draw a Shape, Watch the AI Guess</h1>
+    <p>To a computer, your drawing is just a grid of pixels - <b>numbers</b>. The AI compares your pattern of dark pixels to shapes it knows and shows how confident it is. Draw with your mouse or finger!</p>
+  </header>
+
+  <section class="card">
+    <h2><span class="dot"></span>Draw here - the AI guesses live</h2>
+    <p class="sub">Try drawing one of these shapes: <b>I, T, L, O, X, +</b>. Drag to paint, click to toggle a pixel.</p>
+    <div class="main">
+      <div class="left">
+        <div class="lab">Your drawing (7 x 7 pixels)</div>
+        <div class="grid-wrap" id="gridwrap"><div id="grid"></div></div>
+        <div class="controls">
+          <button class="b-clear" onclick="clearGrid()">Clear</button>
+          <button class="b-tog" onclick="toggleNums()">Show / hide numbers</button>
+        </div>
+        <div class="stencils">
+          <span class="lab" style="margin:0 4px 0 0">Or load a perfect shape:</span>
+          <span class="chip" onclick="loadShape('I')">I</span>
+          <span class="chip" onclick="loadShape('T')">T</span>
+          <span class="chip" onclick="loadShape('L')">L</span>
+          <span class="chip" onclick="loadShape('O')">O</span>
+          <span class="chip" onclick="loadShape('X')">X</span>
+          <span class="chip" onclick="loadShape('+')">+</span>
+        </div>
+      </div>
+      <div class="right">
+        <div class="lab">The AI's guess</div>
+        <p class="guess" id="guess">Draw something to start...</p>
+        <div id="bars"></div>
+        <details class="hood">
+          <summary>Peek under the hood (how it decides)</summary>
+          <div class="hoodbody" id="hood"></div>
+        </details>
+      </div>
+    </div>
+    <div class="note"><b>Class demo:</b> Draw a clean <b>T</b> - the AI is confident. Now erase the top bar so it looks like an <b>I</b> and watch the bars flip. Tiny pixel changes change the guess - just like real vision AI.</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="dot" style="background:var(--amber)"></span>How this maps to real Vision AI (teacher notes)</h2>
+    <ul class="tp">
+      <li><b>Images are numbers:</b> Turn on "Show numbers" - every pixel is a 1 (dark) or 0 (white). The AI never sees a picture, only this grid of numbers.</li>
+      <li><b>Pattern matching:</b> It compares your dark-pixel pattern to a stored pattern for each shape and scores the overlap - the closest match wins.</li>
+      <li><b>Confidence, not certainty:</b> The bars are percentages. A messy drawing lowers confidence - the AI is guessing, not "knowing".</li>
+      <li><b>Real models learn the patterns:</b> Here the shapes are pre-set. Real vision AI learns them from thousands of labeled images (like in Teachable Machine), but the idea is identical: pixels in, pattern match, confident guess out.</li>
+      <li><b>It can be fooled:</b> Draw a sloppy shape and the AI gets confused - a great lead-in to bias and "adversarial" mistakes.</li>
+    </ul>
+  </section>
+
+  <div class="foot">AI Essentials &middot; Week 4 companion demo &middot; runs fully offline in your browser</div>
+</div>
+
+<script>
+"use strict";
+const N=7;
+let state = Array.from({length:N},()=>Array(N).fill(0));
+let cells = [];
+let painting=false, paintVal=1;
+let showNums=false;
+
+// ---- shape prototypes (list of [row,col] dark pixels) ----
+function build(){
+  const P={I:[],T:[],L:[],O:[],X:[],"+":[]};
+  for(let r=0;r<N;r++) P.I.push([r,3]);
+  for(let c=0;c<N;c++) P.T.push([0,c]);
+  for(let r=1;r<N;r++) P.T.push([r,3]);
+  for(let r=0;r<N;r++) P.L.push([r,0]);
+  for(let c=0;c<N;c++) P.L.push([N-1,c]);
+  P.O=[[0,2],[0,3],[0,4],[1,1],[1,5],[2,0],[2,6],[3,0],[3,6],[4,0],[4,6],[5,1],[5,5],[6,2],[6,3],[6,4]];
+  for(let i=0;i<N;i++){ P.X.push([i,i]); P.X.push([i,N-1-i]); }
+  for(let c=0;c<N;c++) P["+"].push([3,c]);
+  for(let r=0;r<N;r++) P["+"].push([r,3]);
+  // to Sets of "r,c"
+  const S={};
+  for(const k in P){ S[k]=new Set(P[k].map(([r,c])=>r+","+c)); }
+  return S;
+}
+const PROTO = build();
+
+function buildGrid(){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  cells=[];
+  for(let r=0;r<N;r++){
+    const row=[];
+    for(let c=0;c<N;c++){
+      const d=document.createElement('div');
+      d.className='cell'; d.dataset.r=r; d.dataset.c=c; d.textContent='0';
+      d.addEventListener('pointerdown',onDown);
+      d.addEventListener('pointerenter',onEnter);
+      g.appendChild(d); row.push(d);
+    }
+    cells.push(row);
+  }
+  document.addEventListener('pointerup',()=>{painting=false;});
+}
+function onDown(e){
+  e.preventDefault();
+  const r=+this.dataset.r, c=+this.dataset.c;
+  paintVal = state[r][c] ? 0 : 1;
+  painting=true;
+  setCell(r,c,paintVal); classify();
+}
+function onEnter(){
+  if(!painting) return;
+  const r=+this.dataset.r, c=+this.dataset.c;
+  if(state[r][c]!==paintVal){ setCell(r,c,paintVal); classify(); }
+}
+function setCell(r,c,v){
+  state[r][c]=v;
+  const el=cells[r][c];
+  el.classList.toggle('on',!!v);
+  el.textContent=v;
+}
+function clearGrid(){ for(let r=0;r<N;r++)for(let c=0;c<N;c++) setCell(r,c,0); classify(); }
+function toggleNums(){ showNums=!showNums; document.getElementById('gridwrap').classList.toggle('nums',showNums); }
+function loadShape(name){
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++) setCell(r,c, PROTO[name].has(r+","+c)?1:0);
+  classify();
+}
+
+function drawnOnCells(){
+  const out=[];
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++) if(state[r][c]) out.push(r+","+c);
+  return out;
+}
+function classify(){
+  const drawn=drawnOnCells();
+  const bars=document.getElementById('bars');
+  const guess=document.getElementById('guess');
+  const hood=document.getElementById('hood');
+  if(drawn.length===0){
+    guess.innerHTML='Draw something to start...';
+    bars.innerHTML=''; hood.innerHTML='Draw a shape to see the math.';
+    return;
+  }
+  const drawnSet=new Set(drawn);
+  const scores=[];
+  for(const k in PROTO){
+    const proto=PROTO[k];
+    let overlap=0; drawnSet.forEach(p=>{ if(proto.has(p)) overlap++; });
+    const precision = overlap/drawn.length;
+    const recall = overlap/proto.size;
+    const f1 = (precision+recall)>0 ? 2*precision*recall/(precision+recall) : 0;
+    scores.push({k,f1,overlap,protoSize:proto.size});
+  }
+  scores.sort((a,b)=>b.f1-a.f1);
+  const tot=scores.reduce((a,b)=>a+b.f1,0) || 1;
+  const colors={I:"#4338CA",T:"#06B6D4",L:"#10B981",O:"#F59E0B",X:"#F43F5E","+":"#8B5CF6"};
+  const top=scores[0];
+  guess.innerHTML = top.f1>0 ? `I think it's a <b>${top.k}</b>` : "Hmm, I'm not sure - try a clearer shape";
+  bars.innerHTML = scores.map(s=>{
+    const pct = s.f1/tot*100;
+    return `<div class="candidate">
+      <div class="w">${s.k}</div>
+      <div class="track"><div class="fill" style="width:${Math.max(3,pct).toFixed(1)}%;background:${colors[s.k]}"></div></div>
+      <div class="pct" style="color:${colors[s.k]}">${pct.toFixed(0)}%</div>
+    </div>`;
+  }).join('');
+  hood.innerHTML = `You drew <code>${drawn.length}</code> dark pixels.<br>`+
+    `Best match <code>${top.k}</code>: <code>${top.overlap}</code> of your pixels line up with the <code>${top.k}</code> pattern `+
+    `(which has <code>${top.protoSize}</code> pixels).<br>`+
+    `<div style="margin-top:8px;color:var(--muted)">It scores the overlap for every shape, then turns the scores into the percentage bars. Highest bar = its guess.</div>`;
+}
+
+buildGrid();
+classify();
+</script>
+</body>
+</html>

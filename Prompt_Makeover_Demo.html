@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Makeover: From Weak to Excellent</title>
+<style>
+  :root{
+    --ink:#12123A; --primary:#4338CA; --accent:#06B6D4; --mint:#10B981;
+    --amber:#F59E0B; --coral:#F43F5E; --violet:#8B5CF6;
+    --light:#F4F5FB; --card:#FFFFFF; --text:#1F2937; --muted:#6B7280; --line:#E2E4F0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--light);color:var(--text);
+    font-family:Calibri,'Segoe UI',system-ui,Arial,sans-serif;line-height:1.45}
+  .wrap{max-width:1040px;margin:0 auto;padding:24px 18px 60px}
+  header.hero{background:var(--ink);color:#fff;border-radius:18px;padding:30px 32px;position:relative;overflow:hidden}
+  header.hero h1{margin:0 0 6px;font-family:'Trebuchet MS',sans-serif;font-size:30px}
+  header.hero p{margin:0;color:#C7CBE8;font-size:17px;max-width:790px}
+  .pill{display:inline-block;background:rgba(255,255,255,.12);color:#CFFAFE;font-size:12px;font-weight:bold;
+    padding:5px 12px;border-radius:20px;margin-bottom:14px;letter-spacing:.5px}
+  .ring{position:absolute;border-radius:50%;opacity:.2}
+  .r1{width:230px;height:230px;background:var(--violet);right:-50px;top:-70px}
+  .r2{width:120px;height:120px;background:var(--primary);right:120px;top:80px;opacity:.3}
+  section.card{background:var(--card);border-radius:16px;padding:24px 26px;margin-top:22px;box-shadow:0 6px 22px rgba(31,41,55,.07)}
+  h2{font-family:'Trebuchet MS',sans-serif;color:var(--ink);font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  h2 .dot{width:14px;height:26px;border-radius:4px;background:var(--violet);display:inline-block}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 16px}
+  .ingredients{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:6px}
+  .ing{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#FBFBFE}
+  .ing b{color:var(--ink)} .ing .ex{color:var(--muted);font-size:13.5px;display:block;margin-top:4px;font-style:italic}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .chip{background:#F1ECFE;color:var(--violet);border:1px solid #E0D6FB;border-radius:18px;padding:8px 15px;font-weight:bold;font-size:14px;cursor:pointer}
+  .chip:hover{background:var(--violet);color:#fff} .chip.active{background:var(--violet);color:#fff}
+  .levelhdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .stepname{font-weight:bold;color:var(--ink);font-size:15px}
+  .meter{flex:1;min-width:200px;background:#EBEDF7;border-radius:10px;height:22px;overflow:hidden;position:relative}
+  .meter .fill{height:100%;border-radius:10px;transition:width .35s, background .35s}
+  .qual{font-weight:bold;min-width:90px;text-align:right}
+  .promptbox{background:#0E1030;color:#fff;border-radius:12px;padding:18px 20px;font-size:19px;
+    font-family:'Trebuchet MS',sans-serif;min-height:64px;line-height:1.4}
+  .promptbox .tag{display:inline-block;background:rgba(139,92,246,.25);color:#DDD6FE;border-radius:6px;
+    font-size:12px;font-weight:bold;padding:2px 8px;margin-bottom:8px}
+  .added{color:#5EEAD4;font-weight:bold}
+  .why{background:#F1ECFE;border-left:4px solid var(--violet);border-radius:8px;padding:11px 14px;font-size:14.5px;margin-top:12px}
+  .why b{color:var(--violet)}
+  .out{margin-top:12px;border:1px dashed var(--line);border-radius:10px;padding:12px 14px;background:#FCFCFE}
+  .out .olab{font-size:12px;font-weight:bold;color:var(--muted);letter-spacing:.4px}
+  .out .otext{font-size:15px;margin-top:5px}
+  .checklist{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .tick{font-size:13px;font-weight:bold;border-radius:18px;padding:6px 12px;border:1px solid var(--line);color:var(--muted);background:#fff}
+  .tick.on{background:#ECFDF5;border-color:#A7F3D0;color:#065F46}
+  .tick.on::before{content:"\2713 "}
+  .controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+  button{font-family:inherit;font-size:15px;font-weight:bold;border:none;border-radius:10px;padding:11px 16px;cursor:pointer;color:#fff;transition:.12s}
+  button:hover{filter:brightness(1.07)} button:active{transform:translateY(1px)} button:disabled{opacity:.4;cursor:default}
+  .b-imp{background:var(--mint)} .b-back{background:#E7E9F5;color:var(--ink)} .b-reset{background:#E7E9F5;color:var(--ink)} .b-auto{background:var(--violet)}
+  textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:10px;padding:12px;font-family:inherit;font-size:15px;resize:vertical}
+  .scorebig{font-size:40px;font-weight:bold;font-family:'Trebuchet MS',sans-serif}
+  .checkgrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .cc{border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;font-weight:bold;color:var(--muted);background:#fff;min-width:150px}
+  .cc.has{background:#ECFDF5;border-color:#A7F3D0;color:#065F46}
+  .cc.miss{background:#FEF2F2;border-color:#FECACA;color:#991B1B}
+  .tips{margin-top:12px;font-size:14.5px}
+  .tips li{margin:5px 0}
+  .note{background:#FFF7E6;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;font-size:14.5px;margin-top:16px}
+  ul.tp{margin:6px 0 0;padding-left:22px} ul.tp li{margin:7px 0;font-size:15px}
+  .foot{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="ring r1"></span><span class="ring r2"></span>
+    <span class="pill">WEEK 3 - GENERATIVE AI - LIVE DEMO</span>
+    <h1>Prompt Makeover: From Weak to Excellent</h1>
+    <p>The same AI gives a so-so answer to a lazy prompt and a great answer to a clear one. Pick a goal and press <b>"Improve it"</b> to upgrade a weak prompt step by step - and watch the quality meter climb.</p>
+  </header>
+
+  <section class="card">
+    <h2><span class="dot"></span>The 5 ingredients of a great prompt</h2>
+    <p class="sub">Most excellent prompts mix these together:</p>
+    <div class="ingredients">
+      <div class="ing"><b>1. Clear task</b><span class="ex">"Explain...", "Write...", "Make a plan..."</span></div>
+      <div class="ing"><b>2. Audience / context</b><span class="ex">"for a 7th grader", "for my best friend"</span></div>
+      <div class="ing"><b>3. Format & length</b><span class="ex">"3 bullet points", "150 words", "a table"</span></div>
+      <div class="ing"><b>4. Role</b><span class="ex">"Act as a friendly tutor / coach / author"</span></div>
+      <div class="ing"><b>5. Tone & extras</b><span class="ex">"keep it funny", "avoid jargon", "add an example"</span></div>
+    </div>
+  </section>
+
+  <!-- DEMO 1 -->
+  <section class="card">
+    <h2><span class="dot" style="background:var(--mint)"></span>Demo 1: Improve the prompt, step by step</h2>
+    <p class="sub">Choose a goal, then keep pressing "Improve it".</p>
+    <div class="chips" id="chips"></div>
+
+    <div class="levelhdr">
+      <span class="stepname" id="stepname"></span>
+      <div class="meter"><div class="fill" id="meterfill"></div></div>
+      <span class="qual" id="qual"></span>
+    </div>
+
+    <div class="promptbox" id="promptbox" style="margin-top:12px"></div>
+    <div class="checklist" id="checklist"></div>
+    <div class="why" id="why"></div>
+    <div class="out">
+      <div class="olab">EXAMPLE OF WHAT THE AI MIGHT RETURN</div>
+      <div class="otext" id="otext"></div>
+    </div>
+
+    <div class="controls">
+      <button class="b-imp" id="impBtn" onclick="improve()">Improve it &#9658;</button>
+      <button class="b-back" id="backBtn" onclick="back()">Step back</button>
+      <button class="b-auto" onclick="autoRun()">Auto-improve</button>
+      <button class="b-reset" onclick="reset()">Start over</button>
+    </div>
+  </section>
+
+  <!-- DEMO 2 -->
+  <section class="card">
+    <h2><span class="dot" style="background:var(--accent)"></span>Demo 2: Score your own prompt</h2>
+    <p class="sub">Paste or type a prompt and click Check. The meter looks for the 5 ingredients and gives tips.</p>
+    <textarea id="userprompt" placeholder="e.g. Act as a friendly tutor. Explain gravity to a 6th grader in 3 short bullet points with one sports example."></textarea>
+    <div class="controls">
+      <button class="b-imp" onclick="checkPrompt()">Check my prompt</button>
+      <button class="b-reset" onclick="loadSample()">Load a strong example</button>
+    </div>
+    <div id="checkresult" style="margin-top:14px;display:none">
+      <div class="levelhdr">
+        <span class="scorebig" id="userscore"></span>
+        <div class="meter"><div class="fill" id="usermeter"></div></div>
+        <span class="qual" id="userqual"></span>
+      </div>
+      <div class="checkgrid" id="checkgrid"></div>
+      <ul class="tips" id="tips"></ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="dot" style="background:var(--amber)"></span>Teacher talking points</h2>
+    <ul class="tp">
+      <li><b>Same AI, different result:</b> The model didn't get smarter between steps - the <b>prompt</b> got clearer. Better questions get better answers.</li>
+      <li><b>Specific beats long:</b> A short, specific prompt beats a long, vague one. Audience + format do the heavy lifting.</li>
+      <li><b>Role sets the voice:</b> "Act as a coach / author / tutor" steers tone and word choice.</li>
+      <li><b>Iterate:</b> Real prompting is a back-and-forth - "make it shorter", "add an example", "simpler words".</li>
+      <li><b>Still verify:</b> Even an excellent prompt can produce a confident wrong answer (a hallucination). Always check facts.</li>
+    </ul>
+    <div class="note"><b>Try with the class:</b> Start at Step 1, ask students to predict the AI's answer, then press "Improve it" and compare. Then have them score their own prompts in Demo 2 and aim for "Excellent".</div>
+  </section>
+
+  <div class="foot">AI Essentials &middot; Week 3 companion demo &middot; example outputs are illustrative &middot; runs fully offline</div>
+</div>
+
+<script>
+"use strict";
+// added: which ingredient each step introduces (for the checklist ticks)
+const TICKS = ["Clear task","Audience / context","Format & length","Role & tone"];
+
+const SCEN = {
+  explain: { name:"Explain a topic", levels:[
+    {prompt:"photosynthesis", added:"Just a topic - no instruction", score:15, qual:"Weak",
+      why:"The AI has to guess what you want. You might get a definition, a paragraph, or a quiz - a coin flip.",
+      out:"\"Photosynthesis is the process by which plants make food...\" - a generic textbook paragraph that may not be what you needed."},
+    {prompt:"Explain photosynthesis.", added:"A clear task verb: \"Explain\"", score:35, qual:"Basic",
+      why:"Now it knows the job. But it doesn't know who it's for, so it may be too long or too advanced.",
+      out:"A multi-paragraph explanation using words like 'chlorophyll' and 'glucose' - probably too hard for a beginner."},
+    {prompt:"Explain photosynthesis to a 7th grader who likes soccer.", added:"Audience & context", score:60, qual:"Good",
+      why:"Telling it WHO it's for changes the words and examples it chooses.",
+      out:"A simpler explanation aimed at a 12-year-old, starting to use everyday comparisons."},
+    {prompt:"Explain photosynthesis to a 7th grader who likes soccer. Use 3 short bullet points.", added:"Format & length", score:82, qual:"Strong",
+      why:"Now the answer is the right shape and size - easy to read and remember.",
+      out:"Three tidy bullets: sunlight in, water in, plant turns them into food and oxygen."},
+    {prompt:"Act as a friendly science tutor. Explain photosynthesis to a 7th grader who likes soccer in 3 short bullet points. Add one soccer analogy and avoid jargon.", added:"Role + tone + an example to include", score:100, qual:"Excellent",
+      why:"A role sets the voice, the analogy makes it stick, and 'avoid jargon' keeps it clear.",
+      out:"Three friendly bullets ending with: 'Sunlight is like the energy drink that powers the plant's game.'"}
+  ]},
+  message: { name:"Write a message", levels:[
+    {prompt:"birthday message", added:"Just a topic", score:15, qual:"Weak",
+      why:"It might write a poem, a card, or one generic line - you can't predict which.",
+      out:"\"Happy birthday! Hope you have a great day.\" - generic and forgettable."},
+    {prompt:"Write a birthday message.", added:"A clear task verb: \"Write\"", score:35, qual:"Basic",
+      why:"It knows to write a message, but not for whom or how long.",
+      out:"A short, plain greeting that could be for literally anyone."},
+    {prompt:"Write a birthday message for my best friend Maya, who loves art and turns 14.", added:"Audience & context", score:62, qual:"Good",
+      why:"Names and details let it personalize - art, the age, the friendship.",
+      out:"A warmer note that mentions Maya, her art, and turning 14."},
+    {prompt:"Write a birthday message for my best friend Maya (turns 14, loves painting). Keep it to 3 warm, funny sentences.", added:"Format, length & tone", score:84, qual:"Strong",
+      why:"Now it's the right length and the right mood.",
+      out:"Three cheerful, funny sentences about Maya and her painting."},
+    {prompt:"Act as a thoughtful friend. Write a warm, funny 3-sentence birthday text for my best friend Maya, who turns 14 and loves painting. Work in our inside joke about pineapple pizza.", added:"Role + a personal detail to include", score:100, qual:"Excellent",
+      why:"The inside joke makes it feel real and one-of-a-kind.",
+      out:"Three heartfelt, funny sentences that slip in the pineapple-pizza joke."}
+  ]},
+  plan: { name:"Make a study plan", levels:[
+    {prompt:"study plan", added:"Just a topic", score:15, qual:"Weak",
+      why:"No subject, no date, no time budget - it can only guess.",
+      out:"A generic 'study a little every day' list with no real focus."},
+    {prompt:"Make a study plan.", added:"A clear task verb: \"Make\"", score:35, qual:"Basic",
+      why:"Still nothing to aim at - no subject or deadline.",
+      out:"A vague weekly plan that fits no test in particular."},
+    {prompt:"Make a study plan for my math test next Friday.", added:"Audience & context", score:60, qual:"Good",
+      why:"Now it can count the days and aim at math.",
+      out:"A day-by-day plan leading up to Friday's math test."},
+    {prompt:"Make a 5-day study plan for my math test on fractions and decimals next Friday, about 30 minutes a day.", added:"Format & specifics", score:82, qual:"Strong",
+      why:"Topics plus a time budget give a realistic, doable plan.",
+      out:"A 5-day plan, ~30 min daily, focused on fractions and decimals."},
+    {prompt:"Act as a study coach. Make a 5-day plan (Mon-Fri) for my math test on fractions and decimals, ~30 min/day, as a simple table mixing practice and review. I'm tired in the evenings, so keep those light.", added:"Role + table format + a personal constraint", score:100, qual:"Excellent",
+      why:"A table is easy to follow, and the plan adapts to your energy.",
+      out:"A clean Mon-Fri table with lighter tasks scheduled for the evenings."}
+  ]},
+  story: { name:"Write a short story", levels:[
+    {prompt:"story", added:"Just a topic", score:15, qual:"Weak",
+      why:"It could write anything - any topic, length, or age group.",
+      out:"A random short story on a random subject."},
+    {prompt:"Write a short story.", added:"A clear task verb: \"Write\"", score:35, qual:"Basic",
+      why:"It writes a story, but with no subject or audience.",
+      out:"A generic short story that may not fit your class at all."},
+    {prompt:"Write a short story about a kid who finds a robot in the park.", added:"Audience & context (the idea)", score:60, qual:"Good",
+      why:"Now the plot is yours, not the AI's random guess.",
+      out:"A story about a kid and a park robot - getting closer."},
+    {prompt:"Write a 150-word story for ages 10-12 about a shy kid who finds a broken robot in the park.", added:"Length + audience + detail", score:82, qual:"Strong",
+      why:"Right length, right age, and a clearer main character.",
+      out:"A ~150-word, age-appropriate story about a shy kid and a broken robot."},
+    {prompt:"Act as a children's author. Write a 150-word adventure for ages 10-12 about a shy kid who finds a broken robot in the park and fixes it. Use simple words, a hopeful tone, and end on a cliffhanger.", added:"Role + tone + a specific ending", score:100, qual:"Excellent",
+      why:"The role and tone shape the voice; the cliffhanger gives a strong finish.",
+      out:"A hopeful ~150-word adventure that ends right on a cliffhanger."}
+  ]}
+};
+
+const QCOLORS = {Weak:"#F43F5E",Basic:"#F59E0B",Good:"#06B6D4",Strong:"#10B981",Excellent:"#059669"};
+let cur="explain", lvl=0;
+
+function renderChips(){
+  document.getElementById('chips').innerHTML =
+    Object.keys(SCEN).map(k=>`<span class="chip" id="chip-${k}" onclick="pick('${k}')">${SCEN[k].name}</span>`).join('');
+}
+function pick(k){ cur=k; lvl=0; setActiveChip(); render(); }
+function setActiveChip(){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  const el=document.getElementById('chip-'+cur); if(el) el.classList.add('active');
+}
+function render(){
+  const L=SCEN[cur].levels[lvl];
+  document.getElementById('stepname').textContent = `Step ${lvl+1} of 5`;
+  const fill=document.getElementById('meterfill');
+  fill.style.width = L.score+"%"; fill.style.background = QCOLORS[L.qual];
+  const q=document.getElementById('qual'); q.textContent=L.qual; q.style.color=QCOLORS[L.qual];
+  document.getElementById('promptbox').innerHTML =
+    `<span class="tag">YOUR PROMPT</span><br>${escapeHtml(L.prompt)}`;
+  document.getElementById('why').innerHTML = `<b>What changed:</b> ${L.added}. ${L.why}`;
+  document.getElementById('otext').textContent = L.out;
+  // checklist ticks = number of upgrades applied so far (lvl)
+  document.getElementById('checklist').innerHTML =
+    TICKS.map((t,i)=>`<span class="tick ${i<lvl?'on':''}">${t}</span>`).join('');
+  document.getElementById('impBtn').disabled = (lvl>=4);
+  document.getElementById('backBtn').disabled = (lvl<=0);
+}
+function improve(){ if(lvl<4){ lvl++; render(); } }
+function back(){ if(lvl>0){ lvl--; render(); } }
+function reset(){ lvl=0; render(); }
+let autoT=null;
+function autoRun(){
+  if(autoT){clearInterval(autoT);autoT=null;}
+  lvl=0; render();
+  autoT=setInterval(()=>{ if(lvl>=4){clearInterval(autoT);autoT=null;return;} lvl++; render(); },1500);
+}
+function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ---------- Demo 2: prompt strength checker ----------
+function checkPrompt(){
+  const text=(document.getElementById('userprompt').value||"").trim();
+  const res=document.getElementById('checkresult');
+  if(!text){ alert("Type or paste a prompt first."); return; }
+  const lc=" "+text.toLowerCase()+" ";
+  const words=text.split(/\s+/).filter(Boolean).length;
+  const has={};
+  has.task = /\b(write|explain|make|list|plan|create|describe|compare|summari[sz]e|draw|design|give|suggest|translate|solve|outline)\b/.test(lc);
+  has.context = /\b(for|to a|to an|grade|grader|year[- ]?old|years old|beginner|kids|child|students?|my |our |audience)\b/.test(lc);
+  has.format = /\b(bullet|bullets|steps|step-by-step|table|list|paragraph|sentence|sentences|words|word|\d+\s*(words|bullets|points|sentences|steps)|points)\b/.test(lc) || /\b\d+\b/.test(lc);
+  has.role = /\b(act as|you are|as a|pretend you|imagine you are)\b/.test(lc);
+  has.tone = /\b(tone|funny|formal|friendly|simple|casual|serious|avoid|don'?t|no jargon|keep it|warm|hopeful|example|analogy)\b/.test(lc);
+  let score=0;
+  score += has.task?22:0;
+  score += has.context?22:0;
+  score += has.format?20:0;
+  score += has.role?18:0;
+  score += has.tone?18:0;
+  // small bonus/penalty for length
+  if(words<3) score=Math.min(score,15);
+  else if(words>=12) score=Math.min(100,score+5);
+  score=Math.max(0,Math.min(100,score));
+  let qual = score<30?"Weak":score<55?"Basic":score<75?"Good":score<95?"Strong":"Excellent";
+  res.style.display="block";
+  document.getElementById('userscore').textContent=score;
+  document.getElementById('userscore').style.color=QCOLORS[qual];
+  const mf=document.getElementById('usermeter'); mf.style.width=score+"%"; mf.style.background=QCOLORS[qual];
+  const uq=document.getElementById('userqual'); uq.textContent=qual; uq.style.color=QCOLORS[qual];
+  const labels={task:"Clear task",context:"Audience / context",format:"Format & length",role:"Role",tone:"Tone & extras"};
+  document.getElementById('checkgrid').innerHTML = Object.keys(labels).map(k=>
+    `<div class="cc ${has[k]?'has':'miss'}">${has[k]?'✓':'✗'} ${labels[k]}</div>`).join('');
+  const tipMap={
+    task:"Add a clear action verb (Explain, Write, Make a plan...).",
+    context:"Say who it's for (e.g. 'for a 6th grader' or 'for my coach').",
+    format:"Ask for a shape and size (e.g. '3 bullets', '150 words', 'a table').",
+    role:"Give it a role (e.g. 'Act as a friendly tutor').",
+    tone:"Add tone or an extra (e.g. 'keep it funny', 'avoid jargon', 'add an example')."
+  };
+  const missing=Object.keys(labels).filter(k=>!has[k]);
+  const tips=document.getElementById('tips');
+  tips.innerHTML = missing.length
+    ? "<b>To level up, try:</b>"+missing.map(k=>`<li>${tipMap[k]}</li>`).join('')
+    : "<b>Nice! Your prompt has all five ingredients.</b> Now make sure it is specific and then test it in a real AI tool.";
+}
+function loadSample(){
+  document.getElementById('userprompt').value =
+    "Act as a friendly science tutor. Explain gravity to a 6th grader who loves basketball, in 3 short bullet points. Add one basketball example and avoid jargon.";
+  checkPrompt();
+}
+
+renderChips(); setActiveChip(); render();
+</script>
+</body>
+</html>

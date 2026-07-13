@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How AI Predicts the Next Word - Live Demo</title>
+<style>
+  :root{
+    --ink:#12123A; --primary:#4338CA; --accent:#06B6D4; --mint:#10B981;
+    --amber:#F59E0B; --coral:#F43F5E; --violet:#8B5CF6;
+    --light:#F4F5FB; --card:#FFFFFF; --text:#1F2937; --muted:#6B7280; --line:#E2E4F0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--light);color:var(--text);
+    font-family:Calibri,'Segoe UI',system-ui,Arial,sans-serif;line-height:1.45}
+  .wrap{max-width:1040px;margin:0 auto;padding:24px 18px 60px}
+  header.hero{background:var(--ink);color:#fff;border-radius:18px;padding:30px 32px;
+    position:relative;overflow:hidden}
+  header.hero h1{margin:0 0 6px;font-family:'Trebuchet MS',sans-serif;font-size:30px;letter-spacing:.3px}
+  header.hero p{margin:0;color:#C7CBE8;font-size:17px;max-width:760px}
+  .pill{display:inline-block;background:rgba(255,255,255,.12);color:#CFFAFE;
+    font-size:12px;font-weight:bold;padding:5px 12px;border-radius:20px;margin-bottom:14px;letter-spacing:.5px}
+  .ring{position:absolute;border-radius:50%;opacity:.18}
+  .r1{width:230px;height:230px;background:var(--primary);right:-50px;top:-70px}
+  .r2{width:120px;height:120px;background:var(--accent);right:120px;top:80px;opacity:.25}
+  section.card{background:var(--card);border-radius:16px;padding:24px 26px;margin-top:22px;
+    box-shadow:0 6px 22px rgba(31,41,55,.07)}
+  h2{font-family:'Trebuchet MS',sans-serif;color:var(--ink);font-size:23px;margin:0 0 4px;
+    display:flex;align-items:center;gap:10px}
+  h2 .dot{width:14px;height:26px;border-radius:4px;background:var(--primary);display:inline-block}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 18px}
+  .stage{background:#0E1030;color:#fff;border-radius:12px;padding:20px 22px;min-height:78px;
+    font-size:26px;font-family:'Trebuchet MS',sans-serif;letter-spacing:.3px;display:flex;
+    align-items:center;flex-wrap:wrap;gap:2px}
+  .stage .cursor{display:inline-block;width:3px;height:30px;background:var(--accent);
+    margin-left:4px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .stage .end{color:var(--mint);font-weight:bold;margin-left:8px;font-size:20px}
+  .hint{color:#8E93C0;font-size:15px}
+  .candidates{margin:18px 0 4px}
+  .candidate{display:flex;align-items:center;gap:12px;margin:9px 0;cursor:pointer;
+    border:2px solid transparent;border-radius:10px;padding:6px 8px;transition:.12s}
+  .candidate:hover{background:#F0F2FD;border-color:var(--primary)}
+  .candidate .w{width:120px;font-weight:bold;color:var(--ink);font-size:18px;text-align:right;flex:none}
+  .candidate .track{flex:1;background:#EBEDF7;border-radius:8px;height:26px;position:relative;overflow:hidden}
+  .candidate .fill{height:100%;border-radius:8px;min-width:6px}
+  .candidate .pct{width:58px;font-weight:bold;flex:none}
+  .candidate .cnt{width:78px;color:var(--muted);font-size:13px;flex:none}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;align-items:center}
+  button{font-family:inherit;font-size:15px;font-weight:bold;border:none;border-radius:10px;
+    padding:11px 16px;cursor:pointer;color:#fff;transition:.12s}
+  button:hover{filter:brightness(1.07)}
+  button:active{transform:translateY(1px)}
+  button.sec{background:#E7E9F5;color:var(--ink)}
+  .b-top{background:var(--mint)} .b-rand{background:var(--violet)} .b-auto{background:var(--primary)}
+  .b-clear{background:#E7E9F5;color:var(--ink)}
+  .starters{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}
+  .chip{background:#EEF0FB;color:var(--primary);border:1px solid #D9DCEF;border-radius:18px;
+    padding:7px 14px;font-weight:bold;font-size:14px;cursor:pointer}
+  .chip:hover{background:var(--primary);color:#fff}
+  .temp{display:flex;align-items:center;gap:12px;margin-top:14px;background:#F7F8FE;
+    border:1px solid var(--line);border-radius:12px;padding:12px 16px;flex-wrap:wrap}
+  .temp input[type=range]{flex:1;min-width:180px;accent-color:var(--violet)}
+  .temp .lab{font-weight:bold;color:var(--ink);font-size:14px}
+  .temp .end-lab{font-size:13px;color:var(--muted);width:90px}
+  details.hood{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:6px 14px;background:#FBFBFE}
+  details.hood summary{cursor:pointer;font-weight:bold;color:var(--primary);padding:8px 0}
+  .hoodbody{font-size:14.5px;color:var(--text);padding:4px 0 12px}
+  .hoodbody code{background:#EEF0FB;border-radius:5px;padding:1px 7px;color:var(--ink);font-weight:bold}
+  .stat{display:inline-block;background:#EEF0FB;border-radius:8px;padding:4px 10px;margin:2px 6px 2px 0;
+    font-size:13px;font-weight:bold;color:var(--primary)}
+  textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:10px;padding:12px;
+    font-family:inherit;font-size:14px;resize:vertical}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .note{background:#FFF7E6;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;
+    font-size:14.5px;margin-top:14px}
+  ul.tp{margin:6px 0 0;padding-left:22px} ul.tp li{margin:7px 0;font-size:15px}
+  .foot{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+  .legend{font-size:13px;color:var(--muted);margin-top:2px}
+  @media(max-width:620px){
+    .candidate .w{width:80px;font-size:16px} .candidate .cnt{display:none}
+    header.hero h1{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="ring r1"></span><span class="ring r2"></span>
+    <span class="pill">WEEK 3 - GENERATIVE AI - LIVE DEMO</span>
+    <h1>How AI Predicts the Next Word</h1>
+    <p>A Large Language Model (like ChatGPT) is really a giant <b>next-word predictor</b>. It looks at the words so far, guesses the most likely next word, adds it, and repeats. Try it below - <b>you</b> are the model!</p>
+  </header>
+
+  <!-- DEMO 1 -->
+  <section class="card">
+    <h2><span class="dot"></span>Demo 1: Build a sentence, one word at a time</h2>
+    <p class="sub">Pick a starter, then keep choosing the next word. Watch how the bars (learned from the practice text) change after every word.</p>
+
+    <div class="starters" id="starters"></div>
+    <div class="row" style="margin:10px 0 0">
+      <input type="text" id="startbox" placeholder="...or type your own start here, e.g. the robot"
+        onkeydown="if(event.key==='Enter')startTyped()"
+        style="flex:1;min-width:220px;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-family:inherit;font-size:15px">
+      <button class="b-auto" onclick="startTyped()">Start with this</button>
+    </div>
+
+    <div class="stage" id="stage"><span class="hint">Click a starter above to begin...</span></div>
+
+    <div class="candidates" id="candidates"></div>
+    <div class="legend">Bars show how often each word came next <b>in the training text</b>. Taller bar = more likely.</div>
+
+    <div class="controls">
+      <button class="b-top" onclick="step('top')">Add the top word</button>
+      <button class="b-rand" onclick="step('sample')">Surprise me (roll the dice)</button>
+      <button class="b-auto" onclick="autoWrite()">Auto-write &#9658;</button>
+      <button class="b-clear" onclick="clearStage()">Clear</button>
+      <button class="sec" onclick="undo()">Undo</button>
+    </div>
+
+    <div class="temp">
+      <span class="lab">"Surprise me" mood:</span>
+      <span class="end-lab">Predictable</span>
+      <input type="range" id="temp" min="40" max="160" value="90">
+      <span class="end-lab">Creative</span>
+    </div>
+
+    <details class="hood">
+      <summary>Peek under the hood (what the model is doing)</summary>
+      <div class="hoodbody" id="hood">Pick a starter to see the model's reasoning.</div>
+    </details>
+  </section>
+
+  <!-- DEMO 2 -->
+  <section class="card">
+    <h2><span class="dot" style="background:var(--mint)"></span>Demo 2: Train it yourself</h2>
+    <p class="sub">An AI only knows what's in its training text. Add your own sentences, retrain, and watch the predictions change. This is "learning from data" - live.</p>
+    <div>
+      <span class="stat" id="stat-sent"></span>
+      <span class="stat" id="stat-vocab"></span>
+    </div>
+    <p class="sub" style="margin:14px 0 6px">Add a few new sentences (one per line), then retrain:</p>
+    <textarea id="newtext" placeholder="e.g.
+the cat chased the laser
+i like to bake cookies on sunday
+robots can explore other planets"></textarea>
+    <div class="row">
+      <button class="b-auto" onclick="addAndRetrain()">Add &amp; retrain</button>
+      <button class="b-clear" onclick="resetCorpus()">Reset to default text</button>
+    </div>
+    <div class="note"><b>Try this with the class:</b> Type 5 sentences that all start with <code>the robot</code> ending different ways. Retrain, then in Demo 1 type <code>the robot</code> and see your new words appear in the bars. More examples = better predictions!</div>
+  </section>
+
+  <!-- TEACHER NOTES -->
+  <section class="card">
+    <h2><span class="dot" style="background:var(--amber)"></span>How this maps to real LLMs (teacher talking points)</h2>
+    <ul class="tp">
+      <li><b>Next-word prediction:</b> Real models like ChatGPT do exactly this - predict the next word (token), add it, and repeat - just trained on <b>billions</b> of sentences instead of ~40.</li>
+      <li><b>Learned from data:</b> The bars come from <b>counting</b> what followed each phrase in the text. No rules were written by hand - that's machine learning.</li>
+      <li><b>Probabilities, not certainty:</b> It doesn't "know" the answer; it picks from likely options. That's why the same prompt can give different results.</li>
+      <li><b>Temperature:</b> The "Surprise me" slider is real - LLMs have a <b>temperature</b> setting. Low = safe/predictable, high = creative/random (and more mistakes).</li>
+      <li><b>Context window:</b> Our model looks at the last 1-2 words. Real LLMs look back over thousands of words - so they stay on topic far better.</li>
+      <li><b>Hallucinations:</b> Because it only predicts likely words, it can produce fluent text that's wrong. Always verify!</li>
+    </ul>
+  </section>
+
+  <div class="foot">AI Essentials &middot; Week 3 companion demo &middot; runs fully offline in your browser</div>
+</div>
+
+<script>
+"use strict";
+const DEFAULT_CORPUS = [
+  "the cat sat on the mat","the cat ran after the mouse","the cat likes to sleep all day",
+  "the cat is soft and fluffy","the cat sat by the window",
+  "the dog ran in the park","the dog likes to play fetch","the dog sat by the door",
+  "the dog is loud and friendly","the dog ran after the ball",
+  "i like to eat pizza on friday","i like to play games with my friends",
+  "i like to read books at night","i like to draw funny pictures",
+  "i want to be an artist one day","i want to learn how to code","i want to visit the moon someday",
+  "we go to school every morning","we play soccer after school","we eat lunch in the cafeteria",
+  "on a rainy day i stay inside","on a sunny day we go outside","on a snowy day we build a snowman",
+  "the sky is blue and clear","the sky is grey before it rains","the sky is dark at night",
+  "my favorite color is blue","my favorite food is ice cream","my favorite game is soccer",
+  "she sings a happy song","he draws a funny picture",
+  "robots can help people work","robots can clean the house",
+  "computers can learn from data","computers can play chess very well",
+  "ai can write stories and draw pictures","ai can answer questions in seconds",
+  "the sun is bright and warm today","birds can fly high in the sky","fish can swim deep in the sea",
+  "a good friend is kind and fun","a good book is hard to put down","we learn something new every day"
+];
+const END = "[end of sentence]";
+const COLORS = ["#4338CA","#06B6D4","#10B981","#F59E0B","#F43F5E","#8B5CF6"];
+const STARTERS = ["the cat","the dog","i like","i want","my favorite","on a","robots can","the sky"];
+
+let sentences = DEFAULT_CORPUS.slice();
+let model = null;
+let words = [];
+let ended = false;
+let autoTimer = null;
+
+function tokenize(s){
+  return s.toLowerCase().replace(/[^a-z0-9' ]/g," ").split(/\s+/).filter(Boolean);
+}
+function train(list){
+  const uni={}, bi={}, tri={};
+  for(const sent of list){
+    const w=tokenize(sent); if(!w.length) continue;
+    w.push(END);
+    for(let i=0;i<w.length;i++){
+      uni[w[i]]=(uni[w[i]]||0)+1;
+      if(i>=1){const k=w[i-1];(bi[k]=bi[k]||{})[w[i]]=(bi[k][w[i]]||0)+1;}
+      if(i>=2){const k=w[i-2]+" "+w[i-1];(tri[k]=tri[k]||{})[w[i]]=(tri[k][w[i]]||0)+1;}
+    }
+  }
+  return {uni,bi,tri};
+}
+function sortDist(obj){
+  const tot=Object.values(obj).reduce((a,b)=>a+b,0);
+  return Object.entries(obj).map(([w,c])=>[w,c,c/tot]).sort((a,b)=>b[1]-a[1]);
+}
+function predict(words){
+  const {uni,bi,tri}=model;
+  if(words.length>=2){const k=words[words.length-2]+" "+words[words.length-1];
+    if(tri[k]) return {level:"the last 2 words", ctx:k, dist:sortDist(tri[k])};}
+  if(words.length>=1){const k=words[words.length-1];
+    if(bi[k]) return {level:"the last 1 word", ctx:k, dist:sortDist(bi[k])};}
+  return {level:"the whole text (no match found, backing off)", ctx:"(start)", dist:sortDist(uni)};
+}
+
+function label(w){ return w===END ? "&#9209; end" : w; }
+
+function render(){
+  // stage
+  const stage=document.getElementById('stage');
+  if(words.length===0){
+    stage.innerHTML='<span class="hint">Click a starter above to begin...</span>';
+  } else {
+    let html = words.map(w=>w===END?'':w).join(' ').trim();
+    html += ended ? ' <span class="end">&#9209; (end of sentence)</span>' : '<span class="cursor"></span>';
+    stage.innerHTML = html;
+  }
+  // candidates
+  const box=document.getElementById('candidates');
+  const hood=document.getElementById('hood');
+  if(words.length===0 || ended){
+    box.innerHTML = ended
+      ? '<div class="hint" style="padding:8px 0">The model predicted the sentence is finished. Press <b>Clear</b> or <b>Undo</b> to keep going.</div>'
+      : '';
+    if(words.length===0) hood.innerHTML = "Pick a starter to see the model's reasoning.";
+    return;
+  }
+  const r=predict(words);
+  const top=r.dist.slice(0,6);
+  box.innerHTML = top.map(([w,c,p],i)=>{
+    const col=COLORS[i%COLORS.length];
+    return `<div class="candidate" onclick="choose('${w.replace(/'/g,"\\'")}')">
+      <div class="w">${label(w)}</div>
+      <div class="track"><div class="fill" style="width:${Math.max(4,p*100).toFixed(1)}%;background:${col}"></div></div>
+      <div class="pct" style="color:${col}">${(p*100).toFixed(0)}%</div>
+      <div class="cnt">seen ${c}&times;</div>
+    </div>`;
+  }).join('');
+  // hood
+  const lines = r.dist.slice(0,6).map(([w,c])=>`<code>${w===END?'[end]':w}</code> &times;${c}`).join(' &nbsp; ');
+  hood.innerHTML = `It looked at <b>${r.level}</b>: <code>${r.ctx}</code>.<br>`+
+    `In the training text, these words came next:<br><div style="margin-top:6px">${lines}</div>`+
+    `<div style="margin-top:8px;color:var(--muted)">It turns those counts into percentages (the bars). "Add top word" picks the biggest; "Surprise me" rolls a weighted dice.</div>`;
+}
+
+function tempValue(){ return document.getElementById('temp').value/100; }
+
+function choose(w){
+  stopAuto();
+  words.push(w);
+  if(w===END) ended=true;
+  if(words.filter(x=>x!==END).length>=22) ended=true; // safety stop
+  render();
+}
+function step(mode){
+  if(ended||words.length===0) return;
+  const r=predict(words); if(!r.dist.length) return;
+  if(mode==='top'){ choose(r.dist[0][0]); return; }
+  // sample with temperature
+  const T=tempValue();
+  const weights=r.dist.map(([w,c,p])=>[w,Math.pow(p,1/T)]);
+  const tot=weights.reduce((a,b)=>a+b[1],0);
+  let x=Math.random()*tot;
+  for(const [w,wt] of weights){ x-=wt; if(x<=0){ choose(w); return; } }
+  choose(weights[weights.length-1][0]);
+}
+function autoWrite(){
+  stopAuto();
+  if(ended) clearStage();
+  if(words.length===0){ setStart(STARTERS[Math.floor(Math.random()*STARTERS.length)]); }
+  autoTimer=setInterval(()=>{
+    if(ended){ stopAuto(); return; }
+    step('top');
+  },650);
+}
+function stopAuto(){ if(autoTimer){clearInterval(autoTimer);autoTimer=null;} }
+function undo(){ stopAuto(); if(words.length){ words.pop(); ended=false; render(); } }
+function clearStage(){ stopAuto(); words=[]; ended=false; render(); }
+function setStart(phrase){ stopAuto(); words=tokenize(phrase); ended=false; render(); }
+
+function renderStarters(){
+  document.getElementById('starters').innerHTML =
+    STARTERS.map(s=>`<span class="chip" onclick="setStart('${s}')">${s} ...</span>`).join('');
+}
+function updateStats(){
+  document.getElementById('stat-sent').textContent = sentences.length+" training sentences";
+  document.getElementById('stat-vocab').textContent = Object.keys(model.uni).length+" different words learned";
+}
+function retrain(){ model=train(sentences); updateStats(); render(); }
+function addAndRetrain(){
+  const t=document.getElementById('newtext').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!t.length){ alert("Type at least one sentence first."); return; }
+  sentences=sentences.concat(t);
+  for(const sent of t){
+    const w=tokenize(sent);
+    if(w.length>=2){ const phrase=w[0]+" "+w[1]; if(!STARTERS.includes(phrase)) STARTERS.push(phrase); }
+  }
+  document.getElementById('newtext').value='';
+  retrain();
+  renderStarters();
+  document.querySelector('section.card').scrollIntoView({behavior:'smooth'});
+  alert("Added "+t.length+" sentence(s) and retrained!\nNew starter buttons appeared in Demo 1 (scrolled up). You can also type a phrase in the box, e.g. \"the robot\".");
+}
+function startTyped(){
+  const v=document.getElementById('startbox').value.trim();
+  if(!v){ alert("Type a starting word or phrase first, e.g. the robot"); return; }
+  setStart(v);
+  document.getElementById('candidates').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function resetCorpus(){ sentences=DEFAULT_CORPUS.slice(); retrain(); clearStage(); }
+
+// init
+renderStarters();
+retrain();
+render();
+</script>
+</body>
+</html>

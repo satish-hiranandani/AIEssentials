@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Demos – AI Essentials</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0c14; --surface:#13131f; --card:#1a1a2e;
+  --border:#252540; --text:#e0e0f0; --muted:#6b6b90;
+  --reg:#00e5a0; --reg2:#00b87a; --regbg:#00e5a012;
+  --cls:#ff6b6b; --cls2:#cc4444; --clsbg:#ff6b6b12;
+  --clu:#a78bfa; --clu2:#7c5fd4; --clubg:#a78bfa12;
+  --white:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+h1,h2,h3,h4{font-family:'Syne',sans-serif}
+
+/* ── LAYOUT ── */
+.shell{max-width:960px;margin:0 auto;padding:0 20px 60px}
+
+/* ── HEADER ── */
+.hero{text-align:center;padding:48px 0 36px}
+.hero-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);border-radius:100px;padding:5px 14px;margin-bottom:18px}
+.hero h1{font-size:clamp(32px,6vw,56px);font-weight:800;line-height:1.05;letter-spacing:-.03em;margin-bottom:10px}
+.grad{background:linear-gradient(120deg,var(--reg),var(--clu));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--muted);font-size:15px;max-width:500px;margin:0 auto}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:5px;margin-bottom:32px}
+.tab{flex:1;padding:11px 6px;border:none;border-radius:10px;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;background:transparent;color:var(--muted);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.tab.on-reg{background:var(--regbg);color:var(--reg)}
+.tab.on-cls{background:var(--clsbg);color:var(--cls)}
+.tab.on-clu{background:var(--clubg);color:var(--clu)}
+
+/* ── PANELS ── */
+.panel{display:none}.panel.active{display:block}
+
+/* ── SECTION CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:20px}
+.card-head{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.reg .card-icon{background:var(--regbg)} .cls .card-icon{background:var(--clsbg)} .clu .card-icon{background:var(--clubg)}
+.card-title{font-size:17px;font-weight:700}
+.reg .card-title{color:var(--reg)} .cls .card-title{color:var(--cls)} .clu .card-title{color:var(--clu)}
+.card-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.card-body{padding:22px 24px}
+
+/* ── CONTROLS ── */
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:540px){.controls{grid-template-columns:1fr}}
+.control label{display:block;font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.control input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:var(--border);border-radius:2px;outline:none}
+.control input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;cursor:pointer}
+.reg .control input[type=range]::-webkit-slider-thumb{background:var(--reg)}
+.cls .control input[type=range]::-webkit-slider-thumb{background:var(--cls)}
+.clu .control input[type=range]::-webkit-slider-thumb{background:var(--clu)}
+.val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;float:right}
+.reg .val{color:var(--reg)} .cls .val{color:var(--cls)} .clu .val{color:var(--clu)}
+
+/* ── BUTTON ── */
+.btn{border:none;border-radius:10px;padding:11px 22px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;margin-top:6px}
+.btn-reg{background:var(--reg);color:#000}.btn-reg:hover{background:var(--reg2)}
+.btn-cls{background:var(--cls);color:#fff}.btn-cls:hover{background:var(--cls2)}
+.btn-clu{background:var(--clu);color:#fff}.btn-clu:hover{background:var(--clu2)}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--muted)}
+
+/* ── RESULT BOX ── */
+.result{border-radius:12px;padding:16px 20px;margin-top:16px;font-size:15px}
+.reg .result{background:var(--regbg);border:1px solid var(--reg)} 
+.cls .result{background:var(--clsbg);border:1px solid var(--cls)}
+.clu .result{background:var(--clubg);border:1px solid var(--clu)}
+.result .label{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.1em;opacity:.6;margin-bottom:6px}
+.result .value{font-family:'Syne',sans-serif;font-size:22px;font-weight:800}
+.reg .result .value{color:var(--reg)} .cls .result .value{color:var(--cls)} .clu .result .value{color:var(--clu)}
+.result .note{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* ── CANVAS ── */
+canvas{display:block;width:100%;border-radius:12px;background:var(--card);border:1px solid var(--border);cursor:crosshair}
+
+/* ── CONFIDENCE BARS ── */
+.bars{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.bar-row{display:flex;align-items:center;gap:10px;font-size:13px}
+.bar-label{width:110px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;flex-shrink:0}
+.bar-track{flex:1;height:12px;background:var(--card);border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;transition:width .4s ease}
+.bar-pct{width:38px;text-align:right;font-family:'DM Mono',monospace;font-size:12px;flex-shrink:0}
+
+/* ── CLUSTER LEGEND ── */
+.legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:13px}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+
+/* ── TIP ── */
+.tip{display:flex;gap:10px;background:#ffffff08;border-left:3px solid;border-radius:0 8px 8px 0;padding:11px 14px;margin-top:14px;font-size:13px;line-height:1.55;color:var(--muted)}
+.reg .tip{border-color:var(--reg)} .cls .tip{border-color:var(--cls)} .clu .tip{border-color:var(--clu)}
+
+/* ── STEPS MINI ── */
+.steps{display:flex;flex-direction:column;gap:0;margin-bottom:18px}
+.step-mini{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.step-mini:last-child{border-bottom:none}
+.snum{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;flex-shrink:0;margin-top:1px;border:1px solid}
+.reg .snum{background:var(--regbg);color:var(--reg);border-color:var(--reg)}
+.cls .snum{background:var(--clsbg);color:var(--cls);border-color:var(--cls)}
+.clu .snum{background:var(--clubg);color:var(--clu);border-color:var(--clu)}
+.step-mini p{font-size:13px;color:var(--muted);line-height:1.5;margin-top:3px}
+.step-mini strong{color:var(--text)}
+
+/* ── DATA TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;font-family:'DM Mono',monospace;margin-bottom:16px}
+.data-table th{text-align:left;padding:8px 12px;background:var(--card);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.data-table td{padding:8px 12px;border-bottom:1px solid #1a1a2a}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr.highlight td{background:#ffffff06}
+
+/* discussion */
+.discuss{border-radius:14px;padding:20px 22px;margin-top:4px;border:1px dashed}
+.reg .discuss{border-color:var(--reg);background:var(--regbg)}
+.cls .discuss{border-color:var(--cls);background:var(--clsbg)}
+.clu .discuss{border-color:var(--clu);background:var(--clubg)}
+.discuss h4{font-size:12px;text-transform:uppercase;letter-spacing:.1em;opacity:.6;margin-bottom:10px}
+.discuss ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.discuss ul li{font-size:13px;line-height:1.5;padding-left:16px;position:relative}
+.discuss ul li::before{content:'→';position:absolute;left:0;font-family:'DM Mono',monospace;opacity:.5}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="hero">
+  <div class="hero-badge">AI Essentials · Live In-Browser Demos</div>
+  <h1>ML Models<br><span class="grad">You Can Play With</span></h1>
+  <p>All three demos run right here — no downloads, no accounts, no uploads needed.</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on-reg" id="t-reg" onclick="switchTab('reg')">📈 Regression</button>
+  <button class="tab" id="t-cls" onclick="switchTab('cls')">🏷️ Classification</button>
+  <button class="tab" id="t-clu" onclick="switchTab('clu')">🔵 Clustering</button>
+</div>
+
+<!-- ══════════════ REGRESSION PANEL ══════════════ -->
+<div class="panel active reg" id="p-reg">
+  <div class="card reg">
+    <div class="card-head">
+      <div class="card-icon">📈</div>
+      <div>
+        <div class="card-title">House Price Predictor</div>
+        <div class="card-sub">Adjust the sliders — the model predicts the price in real time</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="steps">
+        <div class="step-mini"><div class="snum reg">1</div><p><strong>Move the sliders</strong> to describe a house — size, bedrooms, location score.</p></div>
+        <div class="step-mini"><div class="snum reg">2</div><p>Watch the <strong>predicted price update instantly</strong> based on what the model learned.</p></div>
+        <div class="step-mini"><div class="snum reg">3</div><p>Try extreme values — a tiny expensive house vs a huge cheap one. What patterns do you notice?</p></div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label>House Size (sqft) <span class="val" id="v-size">1200</span></label>
+          <input type="range" min="300" max="4000" value="1200" id="s-size" oninput="updateReg()">
+        </div>
+        <div class="control">
+          <label>Bedrooms <span class="val" id="v-beds">3</span></label>
+          <input type="range" min="1" max="7" value="3" id="s-beds" oninput="updateReg()">
+        </div>
+        <div class="control">
+          <label>Bathrooms <span class="val" id="v-baths">2</span></label>
+          <input type="range" min="1" max="5" value="2" id="s-baths" oninput="updateReg()">
+        </div>
+        <div class="control">
+          <label>Location Score (1–10) <span class="val" id="v-loc">6</span></label>
+          <input type="range" min="1" max="10" value="6" id="s-loc" oninput="updateReg()">
+        </div>
+        <div class="control">
+          <label>Age of House (years) <span class="val" id="v-age">15</span></label>
+          <input type="range" min="0" max="80" value="15" id="s-age" oninput="updateReg()">
+        </div>
+        <div class="control">
+          <label>Garden? <span class="val" id="v-garden">Yes</span></label>
+          <input type="range" min="0" max="1" value="1" step="1" id="s-garden" oninput="updateReg()">
+        </div>
+      </div>
+
+      <div class="result reg">
+        <div class="label">Predicted House Price</div>
+        <div class="value" id="reg-price">$287,400</div>
+        <div class="note" id="reg-note">Based on: 1200 sqft · 3 bed · 2 bath · Location 6/10 · 15 years old · Has garden</div>
+      </div>
+
+      <canvas id="reg-canvas" height="200"></canvas>
+      <div class="tip">💡 <span><strong>Real world link:</strong> Rightmove, Zillow and estate agents use almost exactly this — a regression model trained on millions of past house sales to estimate your home's value.</span></div>
+    </div>
+  </div>
+
+  <div class="card reg">
+    <div class="card-head"><div class="card-icon">📊</div><div><div class="card-title">Training Data</div><div class="card-sub">The 8 example houses the model learned from</div></div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <tr><th>Size</th><th>Beds</th><th>Location</th><th>Age</th><th>Actual Price</th></tr>
+        <tr><td>800</td><td>2</td><td>4</td><td>30</td><td>$142,000</td></tr>
+        <tr><td>1100</td><td>3</td><td>5</td><td>20</td><td>$198,000</td></tr>
+        <tr><td>1500</td><td>3</td><td>7</td><td>10</td><td>$310,000</td></tr>
+        <tr><td>2000</td><td>4</td><td>8</td><td>5</td><td>$465,000</td></tr>
+        <tr><td>2500</td><td>5</td><td>9</td><td>3</td><td>$620,000</td></tr>
+        <tr><td>900</td><td>2</td><td>3</td><td>40</td><td>$155,000</td></tr>
+        <tr><td>3200</td><td>6</td><td>10</td><td>1</td><td>$890,000</td></tr>
+        <tr><td>1800</td><td>4</td><td>6</td><td>12</td><td>$380,000</td></tr>
+      </table>
+      <div class="tip">💡 <span>The model found the pattern across all 8 rows. It learned that size, location, and age all push the price in different directions.</span></div>
+    </div>
+  </div>
+
+  <div class="card reg">
+    <div class="card-body">
+      <div class="discuss reg">
+        <h4>💬 Class Discussion</h4>
+        <ul>
+          <li>Which slider has the biggest effect on price? Does that match real life?</li>
+          <li>Can you find two completely different houses that get the same predicted price?</li>
+          <li>What important factors is this model missing that would affect a real house price?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CLASSIFICATION PANEL ══════════════ -->
+<div class="panel cls" id="p-cls">
+  <div class="card cls">
+    <div class="card-head">
+      <div class="card-icon">🏷️</div>
+      <div>
+        <div class="card-title">Music Genre Classifier</div>
+        <div class="card-sub">Describe a song's audio features — the model classifies the genre</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="steps">
+        <div class="step-mini"><div class="snum cls">1</div><p><strong>Adjust the audio features</strong> — how energetic, danceable, or acoustic is the song?</p></div>
+        <div class="step-mini"><div class="snum cls">2</div><p>The model gives a <strong>confidence score</strong> for each genre — like a percentage guess.</p></div>
+        <div class="step-mini"><div class="snum cls">3</div><p>Try to describe a song you know and see if the classifier agrees with Spotify's actual genre.</p></div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label>Energy (calm → intense) <span class="val" id="v-energy">65</span></label>
+          <input type="range" min="0" max="100" value="65" id="s-energy" oninput="updateCls()">
+        </div>
+        <div class="control">
+          <label>Danceability <span class="val" id="v-dance">70</span></label>
+          <input type="range" min="0" max="100" value="70" id="s-dance" oninput="updateCls()">
+        </div>
+        <div class="control">
+          <label>Acousticness <span class="val" id="v-acoustic">20</span></label>
+          <input type="range" min="0" max="100" value="20" id="s-acoustic" oninput="updateCls()">
+        </div>
+        <div class="control">
+          <label>Tempo (BPM) <span class="val" id="v-tempo">128</span></label>
+          <input type="range" min="60" max="200" value="128" id="s-tempo" oninput="updateCls()">
+        </div>
+        <div class="control">
+          <label>Loudness <span class="val" id="v-loud">70</span></label>
+          <input type="range" min="0" max="100" value="70" id="s-loud" oninput="updateCls()">
+        </div>
+        <div class="control">
+          <label>Speechiness (words) <span class="val" id="v-speech">30</span></label>
+          <input type="range" min="0" max="100" value="30" id="s-speech" oninput="updateCls()">
+        </div>
+      </div>
+
+      <div class="result cls">
+        <div class="label">Top Predicted Genre</div>
+        <div class="value" id="cls-genre">Pop</div>
+        <div class="note" id="cls-conf">Confidence: 72%</div>
+      </div>
+
+      <div class="bars" id="cls-bars"></div>
+
+      <div class="tip" style="margin-top:16px">💡 <span><strong>Real world link:</strong> This is exactly how Spotify categorises millions of new songs. Their model uses these same audio features — extracted automatically from the raw audio.</span></div>
+    </div>
+  </div>
+
+  <div class="card cls">
+    <div class="card-head"><div class="card-icon">📊</div><div><div class="card-title">What each feature means</div><div class="card-sub">Spotify actually publishes these metrics for every song</div></div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <tr><th>Feature</th><th>Low value means...</th><th>High value means...</th></tr>
+        <tr><td>Energy</td><td>Calm, soft</td><td>Intense, loud</td></tr>
+        <tr><td>Danceability</td><td>Hard to dance to</td><td>Strong beat, rhythmic</td></tr>
+        <tr><td>Acousticness</td><td>Electronic, produced</td><td>Live instruments</td></tr>
+        <tr><td>Tempo</td><td>Slow ballad (60 BPM)</td><td>Fast track (200 BPM)</td></tr>
+        <tr><td>Speechiness</td><td>Mostly music</td><td>Rap, spoken word</td></tr>
+      </table>
+      <div class="tip">💡 <span><strong>Try this:</strong> Set high acousticness + low energy + low tempo → should classify as Folk/Acoustic. High energy + high danceability + high tempo → should classify as EDM/Dance.</span></div>
+    </div>
+  </div>
+
+  <div class="card cls">
+    <div class="card-body">
+      <div class="discuss cls">
+        <h4>💬 Class Discussion</h4>
+        <ul>
+          <li>Can you describe a song everyone in class knows and test if the classifier agrees?</li>
+          <li>Why does the model give percentages instead of a single certain answer?</li>
+          <li>Could this model ever be wrong? What kind of song would confuse it most?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CLUSTERING PANEL ══════════════ -->
+<div class="panel clu" id="p-clu">
+  <div class="card clu">
+    <div class="card-head">
+      <div class="card-icon">🔵</div>
+      <div>
+        <div class="card-title">k-Means Clustering — Live!</div>
+        <div class="card-sub">Click anywhere on the canvas to add data points — watch the clusters form</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="steps">
+        <div class="step-mini"><div class="snum clu">1</div><p><strong>Click on the canvas</strong> to add dots. Try placing them in 2 or 3 obvious groups.</p></div>
+        <div class="step-mini"><div class="snum clu">2</div><p>Press <strong>"Run k-Means"</strong> — the algorithm will find clusters and colour-code them.</p></div>
+        <div class="step-mini"><div class="snum clu">3</div><p>Change the number of clusters (k) and run again. What happens when k is too high or too low?</p></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+        <div class="control" style="flex:1;min-width:140px">
+          <label>Number of Clusters (k) <span class="val" id="v-k">3</span></label>
+          <input type="range" min="2" max="6" value="3" id="s-k" oninput="document.getElementById('v-k').textContent=this.value">
+        </div>
+        <button class="btn btn-clu" onclick="runKMeans()">▶ Run k-Means</button>
+        <button class="btn btn-ghost" onclick="clearCanvas()">✕ Clear</button>
+        <button class="btn btn-ghost" onclick="addRandomPoints()">+ Random Points</button>
+      </div>
+
+      <canvas id="clu-canvas" height="320" onclick="addPoint(event)"></canvas>
+
+      <div class="legend" id="clu-legend"></div>
+      <div class="result clu" id="clu-result" style="display:none">
+        <div class="label">Clustering Result</div>
+        <div class="value" id="clu-val">3 clusters found</div>
+        <div class="note" id="clu-note">The algorithm ran for 0 iterations</div>
+      </div>
+      <div class="tip" style="margin-top:14px">💡 <span><strong>Key insight:</strong> Nobody told the algorithm how many types of users Spotify has — it just found the groups. That's why it's called <em>unsupervised</em> learning.</span></div>
+    </div>
+  </div>
+
+  <div class="card clu">
+    <div class="card-head"><div class="card-icon">🎵</div><div><div class="card-title">How Spotify uses clustering</div><div class="card-sub">Real-world walkthrough of the same algorithm</div></div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <tr><th>User</th><th>Rock plays</th><th>Pop plays</th><th>Jazz plays</th><th>Cluster</th></tr>
+        <tr><td>Alex</td><td>200</td><td>10</td><td>5</td><td style="color:#6ee7b7">🟢 Rock Fan</td></tr>
+        <tr><td>Beth</td><td>5</td><td>180</td><td>2</td><td style="color:#fca5a5">🔴 Pop Fan</td></tr>
+        <tr><td>Carlos</td><td>190</td><td>20</td><td>8</td><td style="color:#6ee7b7">🟢 Rock Fan</td></tr>
+        <tr><td>Dana</td><td>3</td><td>12</td><td>220</td><td style="color:#c4b5fd">🟣 Jazz Fan</td></tr>
+        <tr><td>Eve</td><td>8</td><td>165</td><td>15</td><td style="color:#fca5a5">🔴 Pop Fan</td></tr>
+        <tr><td>Felix</td><td>12</td><td>8</td><td>195</td><td style="color:#c4b5fd">🟣 Jazz Fan</td></tr>
+      </table>
+      <div class="tip">💡 <span>Spotify never labelled "Rock Fan" or "Jazz Fan" — those names are just what we call the clusters <em>after</em> the algorithm found them. The algorithm only saw numbers.</span></div>
+    </div>
+  </div>
+
+  <div class="card clu">
+    <div class="card-body">
+      <div class="discuss clu">
+        <h4>💬 Class Discussion</h4>
+        <ul>
+          <li>What happened when you set k too high — did the clusters still make sense?</li>
+          <li>If nobody labelled the clusters, how does Spotify know what to call them?</li>
+          <li>Could clustering people by their music taste lead to a "filter bubble"?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /shell -->
+
+<script>
+// ═══════════════════════════════════════════
+// REGRESSION
+// ═══════════════════════════════════════════
+function regPredict(size,beds,baths,loc,age,garden){
+  // Trained weights (simple linear model, calibrated to feel realistic)
+  return Math.round(
+    size * 120 +
+    beds * 8000 +
+    baths * 6000 +
+    loc * 18000 -
+    age * 1200 +
+    garden * 15000 +
+    22000
+  );
+}
+
+function fmt(n){ return '$'+n.toLocaleString(); }
+
+const REG_DATA = [
+  {size:800,beds:2,loc:4,age:30,price:142000},
+  {size:1100,beds:3,loc:5,age:20,price:198000},
+  {size:1500,beds:3,loc:7,age:10,price:310000},
+  {size:2000,beds:4,loc:8,age:5,price:465000},
+  {size:2500,beds:5,loc:9,age:3,price:620000},
+  {size:900,beds:2,loc:3,age:40,price:155000},
+  {size:3200,beds:6,loc:10,age:1,price:890000},
+  {size:1800,beds:4,loc:6,age:12,price:380000},
+];
+
+function updateReg(){
+  const size   = +document.getElementById('s-size').value;
+  const beds   = +document.getElementById('s-beds').value;
+  const baths  = +document.getElementById('s-baths').value;
+  const loc    = +document.getElementById('s-loc').value;
+  const age    = +document.getElementById('s-age').value;
+  const garden = +document.getElementById('s-garden').value;
+
+  document.getElementById('v-size').textContent   = size;
+  document.getElementById('v-beds').textContent   = beds;
+  document.getElementById('v-baths').textContent  = baths;
+  document.getElementById('v-loc').textContent    = loc;
+  document.getElementById('v-age').textContent    = age;
+  document.getElementById('v-garden').textContent = garden ? 'Yes' : 'No';
+
+  const price = regPredict(size,beds,baths,loc,age,garden);
+  document.getElementById('reg-price').textContent = fmt(price);
+  document.getElementById('reg-note').textContent  =
+    `${size} sqft · ${beds} bed · ${baths} bath · Location ${loc}/10 · ${age}yr old · ${garden?'Has':'No'} garden`;
+
+  drawRegChart(size, price);
+}
+
+function drawRegChart(currentSize, currentPrice){
+  const canvas = document.getElementById('reg-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio || 600;
+  canvas.height = 200 * window.devicePixelRatio || 200;
+  ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
+  const W = canvas.offsetWidth, H = 200;
+
+  ctx.clearRect(0,0,W,H);
+
+  const pad = {l:55,r:20,t:14,b:38};
+  const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
+
+  const maxPrice = 1000000, maxSize = 4000;
+
+  // Grid
+  ctx.strokeStyle='#1e1e2e';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+ch*(1-i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();
+    ctx.fillStyle='#4a4a6a';ctx.font='10px DM Mono,monospace';
+    ctx.fillText('$'+(i*250)+'k',2,y+4);
+  }
+
+  // Regression line (size only for visualisation)
+  const beds=+document.getElementById('s-beds').value,
+        baths=+document.getElementById('s-baths').value,
+        loc=+document.getElementById('s-loc').value,
+        age=+document.getElementById('s-age').value,
+        garden=+document.getElementById('s-garden').value;
+
+  ctx.beginPath();
+  ctx.strokeStyle='#00e5a040';ctx.lineWidth=2;
+  for(let x=0;x<=cw;x++){
+    const sz=300+(x/cw)*(maxSize-300);
+    const p=regPredict(sz,beds,baths,loc,age,garden);
+    const px=pad.l+x;
+    const py=pad.t+ch*(1-Math.min(p,maxPrice)/maxPrice);
+    x===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+
+  // Training points
+  REG_DATA.forEach(d=>{
+    const px=pad.l+(d.size-300)/(maxSize-300)*cw;
+    const py=pad.t+ch*(1-d.price/maxPrice);
+    ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);
+    ctx.fillStyle='#00e5a060';ctx.fill();
+  });
+
+  // Current prediction point
+  const cx2=pad.l+(currentSize-300)/(maxSize-300)*cw;
+  const cy2=pad.t+ch*(1-Math.min(currentPrice,maxPrice)/maxPrice);
+  ctx.beginPath();ctx.arc(cx2,cy2,8,0,Math.PI*2);
+  ctx.fillStyle='#00e5a0';ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+
+  // Labels
+  ctx.fillStyle='#6b6b90';ctx.font='11px DM Mono,monospace';
+  ctx.fillText('House Size (sqft)',pad.l+cw/2-40,H-6);
+  ctx.fillStyle='#00e5a0';ctx.font='11px DM Mono,monospace';
+  ctx.fillText('● Your House',cx2+12,cy2+4);
+}
+
+// ═══════════════════════════════════════════
+// CLASSIFICATION
+// ═══════════════════════════════════════════
+const GENRES=['Pop','Hip-Hop / Rap','Rock','EDM / Dance','Folk / Acoustic','R&B / Soul'];
+const GENRE_COLORS=['#f472b6','#fb923c','#ef4444','#818cf8','#84cc16','#34d399'];
+
+function clsScore(energy,dance,acoustic,tempo,loud,speech){
+  // Heuristic scoring per genre based on typical Spotify feature ranges
+  const scores={
+    'Pop':         0.4 + dance*0.003 + energy*0.002 + (100-acoustic)*0.001,
+    'Hip-Hop / Rap': speech*0.008 + dance*0.003 + energy*0.002,
+    'Rock':        energy*0.005 + loud*0.003 + (100-acoustic)*0.002 + (100-dance)*0.001,
+    'EDM / Dance': dance*0.004 + energy*0.004 + (tempo>120?0.3:0) + (100-acoustic)*0.003,
+    'Folk / Acoustic': acoustic*0.007 + (100-energy)*0.003 + (200-tempo)*0.001,
+    'R&B / Soul':  dance*0.003 + (100-speech)*0.002 + acoustic*0.001 + 0.1,
+  };
+  // Softmax
+  const vals=Object.values(scores);
+  const expVals=vals.map(v=>Math.exp(v*2));
+  const sum=expVals.reduce((a,b)=>a+b,0);
+  const probs={};
+  GENRES.forEach((g,i)=>probs[g]=expVals[i]/sum);
+  return probs;
+}
+
+function updateCls(){
+  const energy  = +document.getElementById('s-energy').value;
+  const dance   = +document.getElementById('s-dance').value;
+  const acoustic= +document.getElementById('s-acoustic').value;
+  const tempo   = +document.getElementById('s-tempo').value;
+  const loud    = +document.getElementById('s-loud').value;
+  const speech  = +document.getElementById('s-speech').value;
+
+  document.getElementById('v-energy').textContent  = energy;
+  document.getElementById('v-dance').textContent   = dance;
+  document.getElementById('v-acoustic').textContent= acoustic;
+  document.getElementById('v-tempo').textContent   = tempo;
+  document.getElementById('v-loud').textContent    = loud;
+  document.getElementById('v-speech').textContent  = speech;
+
+  const probs = clsScore(energy,dance,acoustic,tempo,loud,speech);
+  const sorted = GENRES.slice().sort((a,b)=>probs[b]-probs[a]);
+
+  document.getElementById('cls-genre').textContent = sorted[0];
+  document.getElementById('cls-conf').textContent  = 'Confidence: '+(probs[sorted[0]]*100).toFixed(1)+'%';
+
+  const barsEl = document.getElementById('cls-bars');
+  barsEl.innerHTML = sorted.map((g,i)=>{
+    const pct = (probs[g]*100).toFixed(1);
+    const col = GENRE_COLORS[GENRES.indexOf(g)];
+    return `<div class="bar-row">
+      <div class="bar-label">${g}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="bar-pct" style="color:${col}">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// CLUSTERING — k-Means
+// ═══════════════════════════════════════════
+let points=[];
+const CLU_COLS=['#6ee7b7','#fca5a5','#93c5fd','#fcd34d','#f9a8d4','#a3e635'];
+
+function getCanvas(){return document.getElementById('clu-canvas');}
+
+function addPoint(e){
+  const canvas=getCanvas();
+  const rect=canvas.getBoundingClientRect();
+  const scaleX=canvas.width/rect.width;
+  const scaleY=canvas.height/rect.height;
+  const x=(e.clientX-rect.left)*scaleX;
+  const y=(e.clientY-rect.top)*scaleY;
+  points.push({x,y,cluster:-1});
+  drawCluCanvas();
+}
+
+function addRandomPoints(){
+  // Add 3 natural-looking blobs
+  const blobs=[
+    {cx:120,cy:100},{cx:380,cy:200},{cx:220,cy:260}
+  ];
+  blobs.forEach(b=>{
+    for(let i=0;i<10;i++){
+      points.push({
+        x:b.cx+(Math.random()-.5)*80,
+        y:b.cy+(Math.random()-.5)*80,
+        cluster:-1
+      });
+    }
+  });
+  drawCluCanvas();
+}
+
+function clearCanvas(){
+  points=[];
+  document.getElementById('clu-result').style.display='none';
+  document.getElementById('clu-legend').innerHTML='';
+  drawCluCanvas();
+}
+
+function drawCluCanvas(){
+  const canvas=getCanvas();
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Background grid
+  ctx.strokeStyle='#1a1a2e';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  if(points.length===0){
+    ctx.fillStyle='#3a3a5a';ctx.font='14px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Click anywhere to add data points',W/2,H/2);
+    ctx.textAlign='left';
+    return;
+  }
+
+  points.forEach(p=>{
+    ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);
+    if(p.cluster>=0){
+      ctx.fillStyle=CLU_COLS[p.cluster];
+      ctx.shadowColor=CLU_COLS[p.cluster];
+      ctx.shadowBlur=6;
+    } else {
+      ctx.fillStyle='#6b6b90';
+      ctx.shadowBlur=0;
+    }
+    ctx.fill();
+    ctx.shadowBlur=0;
+  });
+}
+
+function runKMeans(){
+  if(points.length<2){alert('Add at least a few points first!');return;}
+  const k=+document.getElementById('s-k').value;
+  const canvas=getCanvas();
+  const W=canvas.width,H=canvas.height;
+
+  // Init centroids randomly from existing points
+  const shuffled=[...points].sort(()=>Math.random()-.5);
+  let centroids=shuffled.slice(0,k).map(p=>({x:p.x,y:p.y}));
+
+  let iters=0;
+  for(let iter=0;iter<50;iter++){
+    iters++;
+    // Assign
+    let changed=false;
+    points.forEach(p=>{
+      let best=0,bestD=Infinity;
+      centroids.forEach((c,i)=>{
+        const d=Math.hypot(p.x-c.x,p.y-c.y);
+        if(d<bestD){bestD=d;best=i;}
+      });
+      if(p.cluster!==best){changed=true;p.cluster=best;}
+    });
+    if(!changed)break;
+    // Update centroids
+    centroids=centroids.map((_,i)=>{
+      const grp=points.filter(p=>p.cluster===i);
+      if(!grp.length)return centroids[i];
+      return {x:grp.reduce((s,p)=>s+p.x,0)/grp.length,
+              y:grp.reduce((s,p)=>s+p.y,0)/grp.length};
+    });
+  }
+
+  // Draw centroids
+  drawCluCanvas();
+  const ctx=canvas.getContext('2d');
+  centroids.forEach((c,i)=>{
+    ctx.beginPath();ctx.arc(c.x,c.y,13,0,Math.PI*2);
+    ctx.strokeStyle=CLU_COLS[i];ctx.lineWidth=3;
+    ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=CLU_COLS[i];ctx.font='bold 11px DM Mono,monospace';
+    ctx.fillText('C'+(i+1),c.x-5,c.y+4);
+  });
+
+  // Legend
+  const leg=document.getElementById('clu-legend');
+  leg.innerHTML=centroids.map((_,i)=>
+    `<div class="legend-item"><div class="legend-dot" style="background:${CLU_COLS[i]}"></div>Cluster ${i+1} (${points.filter(p=>p.cluster===i).length} points)</div>`
+  ).join('');
+
+  const res=document.getElementById('clu-result');
+  res.style.display='block';
+  document.getElementById('clu-val').textContent=`${k} clusters found in ${points.length} points`;
+  document.getElementById('clu-note').textContent=`Algorithm converged after ${iters} iteration${iters!==1?'s':''}`;
+}
+
+// ═══════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════
+function switchTab(id){
+  ['reg','cls','clu'].forEach(t=>{
+    document.getElementById('p-'+t).classList.remove('active');
+    document.getElementById('t-'+t).className='tab';
+  });
+  document.getElementById('p-'+id).classList.add('active');
+  document.getElementById('t-'+id).className='tab on-'+id;
+  if(id==='clu') setTimeout(drawCluCanvas,50);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('load',()=>{
+  updateReg();
+  updateCls();
+
+  // Resize handler for regression canvas
+  window.addEventListener('resize',()=>{
+    if(document.getElementById('p-reg').classList.contains('active')) updateReg();
+  });
+});
+</script>
+</body>
+</html>

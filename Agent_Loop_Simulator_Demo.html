@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Loop Simulator</title>
+<style>
+  :root{
+    --ink:#12123A; --primary:#4338CA; --accent:#06B6D4; --mint:#10B981;
+    --amber:#F59E0B; --coral:#F43F5E; --violet:#8B5CF6;
+    --light:#F4F5FB; --card:#FFFFFF; --text:#1F2937; --muted:#6B7280; --line:#E2E4F0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--light);color:var(--text);
+    font-family:Calibri,'Segoe UI',system-ui,Arial,sans-serif;line-height:1.45}
+  .wrap{max-width:1040px;margin:0 auto;padding:24px 18px 60px}
+  header.hero{background:var(--ink);color:#fff;border-radius:18px;padding:30px 32px;position:relative;overflow:hidden}
+  header.hero h1{margin:0 0 6px;font-family:'Trebuchet MS',sans-serif;font-size:30px}
+  header.hero p{margin:0;color:#C7CBE8;font-size:17px;max-width:780px}
+  .pill{display:inline-block;background:rgba(255,255,255,.12);color:#CFFAFE;font-size:12px;font-weight:bold;
+    padding:5px 12px;border-radius:20px;margin-bottom:14px;letter-spacing:.5px}
+  .ring{position:absolute;border-radius:50%;opacity:.18}
+  .r1{width:230px;height:230px;background:var(--primary);right:-50px;top:-70px}
+  .r2{width:120px;height:120px;background:var(--violet);right:120px;top:80px;opacity:.3}
+  section.card{background:var(--card);border-radius:16px;padding:24px 26px;margin-top:22px;box-shadow:0 6px 22px rgba(31,41,55,.07)}
+  h2{font-family:'Trebuchet MS',sans-serif;color:var(--ink);font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  h2 .dot{width:14px;height:26px;border-radius:4px;background:var(--primary);display:inline-block}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .chip{background:#EEF0FB;color:var(--primary);border:1px solid #D9DCEF;border-radius:18px;padding:8px 15px;font-weight:bold;font-size:14px;cursor:pointer}
+  .chip:hover{background:var(--primary);color:#fff}
+  .chip.active{background:var(--primary);color:#fff}
+  .goalbar{background:#0E1030;color:#fff;border-radius:12px;padding:16px 20px;font-size:18px;font-family:'Trebuchet MS',sans-serif}
+  .goalbar span{color:var(--accent);font-weight:bold}
+  .cycle{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin:20px 0 6px}
+  .node{width:150px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:12px 10px;text-align:center;transition:.18s}
+  .node .nm{font-family:'Trebuchet MS',sans-serif;font-weight:bold;color:var(--ink);font-size:16px}
+  .node .ds{font-size:12px;color:var(--muted);margin-top:2px}
+  .node.active{transform:translateY(-4px) scale(1.04);box-shadow:0 8px 20px rgba(67,56,202,.25)}
+  .arrow{color:#C2C7E0;font-size:22px;font-weight:bold}
+  .repeat{text-align:center;color:var(--primary);font-weight:bold;font-size:14px;margin-top:4px}
+  .layout{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px}
+  .col{flex:1;min-width:280px}
+  .panel-title{font-weight:bold;color:var(--ink);font-size:15px;margin:0 0 8px}
+  .checklist{list-style:none;margin:0;padding:0}
+  .checklist li{padding:8px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px;color:var(--muted);font-size:14.5px}
+  .checklist li.done{background:#ECFDF5;border-color:#A7F3D0;color:#065F46;font-weight:bold}
+  .checklist li.done::before{content:"\2713  ";color:var(--mint)}
+  .log{background:#FBFBFE;border:1px solid var(--line);border-radius:12px;padding:8px 8px;max-height:340px;overflow:auto}
+  .entry{display:flex;gap:10px;padding:9px 10px;border-radius:9px;margin:5px 0;font-size:14.5px;align-items:flex-start}
+  .badge{flex:none;font-size:11px;font-weight:bold;color:#fff;border-radius:6px;padding:3px 8px;margin-top:1px;min-width:74px;text-align:center}
+  .b-perceive{background:var(--accent)} .b-plan{background:var(--primary)} .b-act{background:var(--mint)}
+  .b-observe{background:var(--amber)} .b-guardrail{background:var(--coral)} .b-done{background:var(--violet)}
+  .entry .tool{display:inline-block;background:#EEF0FB;color:var(--primary);border-radius:6px;font-size:12px;font-weight:bold;padding:1px 7px;margin-left:6px}
+  .controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+  button{font-family:inherit;font-size:15px;font-weight:bold;border:none;border-radius:10px;padding:11px 16px;cursor:pointer;color:#fff;transition:.12s}
+  button:hover{filter:brightness(1.07)} button:active{transform:translateY(1px)} button:disabled{opacity:.45;cursor:default}
+  .b-next{background:var(--primary)} .b-auto{background:var(--mint)} .b-restart{background:#E7E9F5;color:var(--ink)}
+  .note{background:#FFF7E6;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;font-size:14.5px;margin-top:16px}
+  ul.tp{margin:6px 0 0;padding-left:22px} ul.tp li{margin:7px 0;font-size:15px}
+  .foot{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+  @media(max-width:620px){.node{width:46%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="ring r1"></span><span class="ring r2"></span>
+    <span class="pill">WEEK 5 - AI AGENTS - LIVE DEMO</span>
+    <h1>AI Agent Loop Simulator</h1>
+    <p>An AI agent doesn't just answer - it takes a <b>goal</b> and works toward it: <b>Perceive, Plan, Act, Observe</b>, and repeat. Pick a goal and step through the loop. Watch it hit a snag, re-plan, and pause to ask a human (a guardrail).</p>
+  </header>
+
+  <section class="card">
+    <h2><span class="dot"></span>Pick a goal for the agent</h2>
+    <div class="chips" id="chips"></div>
+    <div class="goalbar" id="goalbar">Choose a goal above to begin.</div>
+
+    <div class="cycle">
+      <div class="node" id="n-perceive"><div class="nm">1. Perceive</div><div class="ds">take in info</div></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node" id="n-plan"><div class="nm">2. Plan</div><div class="ds">decide steps</div></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node" id="n-act"><div class="nm">3. Act</div><div class="ds">use a tool</div></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node" id="n-observe"><div class="nm">4. Observe</div><div class="ds">check result</div></div>
+    </div>
+    <div class="repeat">&#8635; repeat until the goal is met</div>
+
+    <div class="layout">
+      <div class="col" style="flex:0 0 290px">
+        <p class="panel-title">Progress toward the goal</p>
+        <ul class="checklist" id="checklist"></ul>
+      </div>
+      <div class="col">
+        <p class="panel-title">What the agent is doing</p>
+        <div class="log" id="log"><div class="entry"><span style="color:var(--muted)">The agent's steps will appear here...</span></div></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="b-next" id="nextBtn" onclick="nextStep()">Run next step</button>
+      <button class="b-auto" id="autoBtn" onclick="autoRun()">Auto-run &#9658;</button>
+      <button class="b-restart" onclick="restart()">Restart</button>
+    </div>
+    <div class="note"><b>Watch for these moments:</b> a yellow <b>Observe</b> that finds a problem, a blue <b>Plan</b> that adapts, and a red <b>GUARDRAIL</b> where the agent stops to ask a human. That mix - acting on its own but checking in - is what makes a good agent.</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="dot" style="background:var(--amber)"></span>How this maps to real AI agents (teacher notes)</h2>
+    <ul class="tp">
+      <li><b>Goal + loop:</b> Real agents (self-driving cars, smart assistants, coding helpers) run this same Perceive-Plan-Act-Observe loop, often many times per second.</li>
+      <li><b>Tools:</b> Notice the little tool tags (search, poll, maps). Agents act in the world by using tools, not just talking.</li>
+      <li><b>Adapting:</b> When Observe finds a problem, the agent re-plans. That's why agents can handle messy, changing situations.</li>
+      <li><b>Guardrails:</b> The red step is the most important - a safe agent pauses and asks a human before risky or uncertain actions.</li>
+      <li><b>Recipe:</b> Every agent here = a goal + tools + the loop + a guardrail. That's the recipe students use to design their own.</li>
+    </ul>
+  </section>
+
+  <div class="foot">AI Essentials &middot; Week 5 companion demo &middot; runs fully offline in your browser</div>
+</div>
+
+<script>
+"use strict";
+const SCEN = {
+  movie: {
+    goal: "Find ONE movie my friends and I will all enjoy tonight",
+    subgoals: ["Get everyone's likes", "Build a shortlist", "Check it's available", "Pick the winner"],
+    beats: [
+      {s:"perceive", t:"Ask each friend for a favorite genre and one hard 'no'.", tool:"Group poll"},
+      {s:"plan", t:"Build a shortlist of 5 movies that fit everyone's likes and avoid every 'no'.", done:0},
+      {s:"act", t:"Search the streaming apps for those 5 titles.", tool:"Streaming search", done:1},
+      {s:"observe", t:"Problem: 2 of the 5 movies aren't available to stream."},
+      {s:"plan", t:"Re-plan: drop the 2 missing titles and add 2 new matches.", done:2},
+      {s:"act", t:"Check ratings and runtime for the shortlist.", tool:"Ratings lookup"},
+      {s:"observe", t:"One movie is 3 hours - too long for a school night. Remove it."},
+      {s:"guardrail", t:"The top pick is PG-13. Pause and ask a parent if that's okay."},
+      {s:"act", t:"Parent says PG-13 is fine. Send the top 3 to a group vote.", tool:"Group poll"},
+      {s:"observe", t:"The group voted - there's a clear winner!", done:3},
+      {s:"done", t:"Goal achieved: movie night is set."}
+    ]
+  },
+  snack: {
+    goal: "Make a healthy after-school snack everyone can eat",
+    subgoals: ["See what's in the kitchen", "Find a recipe", "Check it's safe", "Make the snack"],
+    beats: [
+      {s:"perceive", t:"Look at what ingredients are in the kitchen.", tool:"Pantry check", done:0},
+      {s:"plan", t:"Find a snack recipe that uses what we already have."},
+      {s:"act", t:"Search recipes for apples, oats, and peanut butter.", tool:"Recipe search", done:1},
+      {s:"observe", t:"Problem: the best recipe needs honey - and we're out."},
+      {s:"plan", t:"Re-plan: pick the recipe that only uses what we have."},
+      {s:"guardrail", t:"A classmate might have a peanut allergy. Pause and check before serving."},
+      {s:"act", t:"Confirmed it's safe. Make oat-and-apple bites.", tool:"Timer", done:2},
+      {s:"observe", t:"They taste great and everyone can eat them.", done:3},
+      {s:"done", t:"Goal achieved: a healthy snack for the whole group."}
+    ]
+  },
+  ride: {
+    goal: "Plan a safe and fun weekend bike ride",
+    subgoals: ["Check the weather", "Choose a route", "Make it safe", "Pack the gear"],
+    beats: [
+      {s:"perceive", t:"Check Saturday's weather forecast.", tool:"Weather", done:0},
+      {s:"observe", t:"Problem: rain is likely on Saturday morning."},
+      {s:"plan", t:"Re-plan: move the ride to Saturday afternoon when it's clear."},
+      {s:"act", t:"Pick a flat, scenic route near the park.", tool:"Maps", done:1},
+      {s:"observe", t:"Problem: the route crosses a busy road."},
+      {s:"plan", t:"Re-plan: switch to the protected bike path instead.", done:2},
+      {s:"guardrail", t:"Riding alone isn't safe. Pause and ask an adult to come or approve."},
+      {s:"act", t:"An adult approves and joins. Pack helmets and water.", tool:"Checklist", done:3},
+      {s:"done", t:"Goal achieved: a safe, fun bike ride is planned."}
+    ]
+  }
+};
+const STAGE_LABEL = {perceive:"PERCEIVE",plan:"PLAN",act:"ACT",observe:"OBSERVE",guardrail:"GUARDRAIL",done:"DONE"};
+
+let cur=null, idx=0, autoTimer=null;
+
+function renderChips(){
+  const names={movie:"Movie night",snack:"Healthy snack",ride:"Bike ride"};
+  document.getElementById('chips').innerHTML =
+    Object.keys(SCEN).map(k=>`<span class="chip" id="chip-${k}" onclick="pick('${k}')">${names[k]}</span>`).join('');
+}
+function pick(k){
+  stopAuto(); cur=k; idx=0;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  document.getElementById('chip-'+k).classList.add('active');
+  document.getElementById('goalbar').innerHTML='Goal: <span>'+SCEN[k].goal+'</span>';
+  document.getElementById('checklist').innerHTML =
+    SCEN[k].subgoals.map((g,i)=>`<li id="sg-${i}">${g}</li>`).join('');
+  document.getElementById('log').innerHTML='<div class="entry"><span style="color:var(--muted)">Press "Run next step" to start the loop...</span></div>';
+  highlight(null);
+  document.getElementById('nextBtn').disabled=false;
+  document.getElementById('autoBtn').disabled=false;
+}
+function highlight(stage){
+  ['perceive','plan','act','observe'].forEach(s=>{
+    document.getElementById('n-'+s).classList.toggle('active', s===stage);
+  });
+}
+function nextStep(){
+  if(cur===null){ alert("Pick a goal first."); return; }
+  const beats=SCEN[cur].beats;
+  if(idx>=beats.length) return;
+  const b=beats[idx]; idx++;
+  highlight(['perceive','plan','act','observe'].includes(b.s)?b.s:null);
+  // log entry
+  const log=document.getElementById('log');
+  if(idx===1) log.innerHTML='';
+  const tool=b.tool?`<span class="tool">${b.tool}</span>`:'';
+  const e=document.createElement('div'); e.className='entry';
+  e.innerHTML=`<span class="badge b-${b.s}">${STAGE_LABEL[b.s]}</span><div>${b.t}${tool}</div>`;
+  log.appendChild(e); log.scrollTop=log.scrollHeight;
+  // progress
+  if(b.done!==undefined){ const li=document.getElementById('sg-'+b.done); if(li) li.classList.add('done'); }
+  if(b.s==="done"){ highlight(null); document.getElementById('nextBtn').disabled=true; document.getElementById('autoBtn').disabled=true; stopAuto(); }
+}
+function autoRun(){
+  if(cur===null){ alert("Pick a goal first."); return; }
+  stopAuto();
+  autoTimer=setInterval(()=>{
+    if(cur===null || idx>=SCEN[cur].beats.length){ stopAuto(); return; }
+    nextStep();
+  },1100);
+}
+function stopAuto(){ if(autoTimer){clearInterval(autoTimer);autoTimer=null;} }
+function restart(){ if(cur!==null) pick(cur); }
+
+renderChips();
+</script>
+</body>
+</html>

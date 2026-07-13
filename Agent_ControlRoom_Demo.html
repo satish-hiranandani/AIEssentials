@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Control Room</title>
+<style>
+  :root{
+    --ink:#12123A; --primary:#4338CA; --accent:#06B6D4; --mint:#10B981;
+    --amber:#F59E0B; --coral:#F43F5E; --violet:#8B5CF6;
+    --light:#F4F5FB; --card:#FFFFFF; --text:#1F2937; --muted:#6B7280; --line:#E2E4F0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--light);color:var(--text);font-family:Calibri,'Segoe UI',system-ui,Arial,sans-serif;line-height:1.45}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px 18px 60px}
+  header.hero{background:var(--ink);color:#fff;border-radius:18px;padding:30px 32px;position:relative;overflow:hidden}
+  header.hero h1{margin:0 0 6px;font-family:'Trebuchet MS',sans-serif;font-size:30px}
+  header.hero p{margin:0;color:#C7CBE8;font-size:17px;max-width:800px}
+  .pill{display:inline-block;background:rgba(255,255,255,.12);color:#CFFAFE;font-size:12px;font-weight:bold;padding:5px 12px;border-radius:20px;margin-bottom:14px;letter-spacing:.5px}
+  .ring{position:absolute;border-radius:50%;opacity:.2}
+  .r1{width:230px;height:230px;background:var(--primary);right:-50px;top:-70px}
+  .r2{width:120px;height:120px;background:var(--violet);right:120px;top:80px;opacity:.3}
+  section.card{background:var(--card);border-radius:16px;padding:24px 26px;margin-top:22px;box-shadow:0 6px 22px rgba(31,41,55,.07)}
+  h2{font-family:'Trebuchet MS',sans-serif;color:var(--ink);font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  h2 .dot{width:14px;height:26px;border-radius:4px;background:var(--primary);display:inline-block}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .chip{background:#EEF0FB;color:var(--primary);border:1px solid #D9DCEF;border-radius:18px;padding:9px 16px;font-weight:bold;font-size:14px;cursor:pointer}
+  .chip:hover{background:var(--primary);color:#fff} .chip.active{background:var(--primary);color:#fff}
+  .goalbar{background:#0E1030;color:#fff;border-radius:12px;padding:14px 18px;font-size:17px;font-family:'Trebuchet MS',sans-serif;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+  .goalbar span.g{color:var(--accent);font-weight:bold}
+  .meter{min-width:210px;text-align:right}
+  .meter .mlab{font-size:12px;color:#B9BED6;font-family:Calibri}
+  .meter .track{background:#26264f;border-radius:8px;height:16px;margin-top:4px;overflow:hidden}
+  .meter .fill{height:100%;border-radius:8px;background:var(--mint);width:100%;transition:width .4s,background .4s}
+  .meter .mval{font-size:16px;font-weight:bold;margin-top:3px}
+  .cycle{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin:18px 0 4px}
+  .node{width:135px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;transition:.18s}
+  .node .nm{font-family:'Trebuchet MS',sans-serif;font-weight:bold;color:var(--ink);font-size:15px}
+  .node .ds{font-size:11px;color:var(--muted)}
+  .node.active{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(67,56,202,.25)}
+  .arrow{color:#C2C7E0;font-size:20px;font-weight:bold}
+  .repeat{text-align:center;color:var(--primary);font-weight:bold;font-size:13px;margin-top:2px}
+  .layout{display:flex;gap:22px;flex-wrap:wrap;margin-top:14px}
+  .col-sub{flex:0 0 260px} .col-feed{flex:1;min-width:300px}
+  .panel-title{font-weight:bold;color:var(--ink);font-size:15px;margin:0 0 8px}
+  .checklist{list-style:none;margin:0;padding:0}
+  .checklist li{padding:8px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px;color:var(--muted);font-size:14px}
+  .checklist li.done{background:#ECFDF5;border-color:#A7F3D0;color:#065F46;font-weight:bold}
+  .checklist li.done::before{content:"\2713  ";color:var(--mint)}
+  .feed{background:#FBFBFE;border:1px solid var(--line);border-radius:12px;padding:8px;max-height:420px;overflow:auto}
+  .entry{display:flex;gap:10px;padding:9px 10px;border-radius:9px;margin:5px 0;font-size:14.5px;align-items:flex-start}
+  .badge{flex:none;font-size:10.5px;font-weight:bold;color:#fff;border-radius:6px;padding:3px 7px;margin-top:1px;min-width:70px;text-align:center;letter-spacing:.3px}
+  .b-perceive{background:var(--accent)} .b-plan{background:var(--primary)} .b-act{background:var(--mint)}
+  .b-observe{background:var(--amber)} .b-decision{background:var(--violet)} .b-guardrail{background:var(--coral)} .b-done{background:var(--violet)} .b-tool{background:#334155}
+  .tool{display:block;margin-top:5px;background:#0E1030;color:#9AE6D6;border-radius:7px;padding:6px 9px;font-family:Consolas,monospace;font-size:12.5px}
+  .tool .res{color:#C7CBE8;display:block;margin-top:2px}
+  .askbox{border:2px solid var(--violet);border-radius:12px;padding:12px 14px;margin:7px 0;background:#F6F3FF}
+  .askbox.guard{border-color:var(--coral);background:#FFF1F2}
+  .askbox .q{font-weight:bold;color:var(--ink);margin-bottom:8px}
+  .askbox button{margin:4px 6px 0 0}
+  .askbox .resolved{margin-top:8px;font-weight:bold;color:#065F46}
+  .controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+  button{font-family:inherit;font-size:15px;font-weight:bold;border:none;border-radius:10px;padding:11px 16px;cursor:pointer;color:#fff;transition:.12s}
+  button:hover{filter:brightness(1.07)} button:active{transform:translateY(1px)} button:disabled{opacity:.4;cursor:default}
+  .b-next{background:var(--primary)} .b-auto{background:var(--mint)} .b-restart{background:#E7E9F5;color:var(--ink)}
+  .b-opt{background:var(--violet)} .b-approve{background:var(--mint)}
+  .note{background:#FFF7E6;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;font-size:14.5px;margin-top:16px}
+  ol.steps{margin:6px 0 0;padding-left:22px} ol.steps li{margin:9px 0;font-size:15px}
+  .promptbox{background:#0E1030;color:#E6E8F5;border-radius:12px;padding:16px 18px;font-family:Consolas,monospace;font-size:13.5px;white-space:pre-wrap;margin-top:10px;line-height:1.5}
+  ul.tp{margin:6px 0 0;padding-left:22px} ul.tp li{margin:7px 0;font-size:15px}
+  .foot{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
+  @media(max-width:640px){.node{width:46%}.col-sub{flex:1 0 100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="ring r1"></span><span class="ring r2"></span>
+    <span class="pill">WEEK 5 - AI AGENTS - ADVANCED DEMO</span>
+    <h1>AI Agent Control Room</h1>
+    <p>Watch an AI agent tackle a bigger, messier goal: it uses <b>tools</b>, tracks a <b>budget or goal</b>, hits problems and <b>re-plans</b>, asks YOU to make key <b>decisions</b>, and pauses at <b>guardrails</b> to get a human's OK. Pick a mission and run the loop.</p>
+  </header>
+
+  <section class="card">
+    <h2><span class="dot"></span>Choose a mission</h2>
+    <div class="chips" id="chips"></div>
+    <div class="goalbar">
+      <div>Goal: <span class="g" id="goaltext">pick a mission above</span></div>
+      <div class="meter" id="meterwrap" style="visibility:hidden">
+        <div class="mlab" id="mlab"></div>
+        <div class="track"><div class="fill" id="mfill"></div></div>
+        <div class="mval" id="mval"></div>
+      </div>
+    </div>
+
+    <div class="cycle">
+      <div class="node" id="n-perceive"><div class="nm">1. Perceive</div><div class="ds">gather info</div></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node" id="n-plan"><div class="nm">2. Plan</div><div class="ds">decide steps</div></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node" id="n-act"><div class="nm">3. Act</div><div class="ds">use a tool</div></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node" id="n-observe"><div class="nm">4. Observe</div><div class="ds">check result</div></div>
+    </div>
+    <div class="repeat">&#8635; repeat, re-planning when things change</div>
+
+    <div class="layout">
+      <div class="col-sub">
+        <p class="panel-title">Mission checklist</p>
+        <ul class="checklist" id="checklist"></ul>
+      </div>
+      <div class="col-feed">
+        <p class="panel-title">Agent activity</p>
+        <div class="feed" id="feed"><div class="entry"><span style="color:var(--muted)">Pick a mission, then press "Run next step".</span></div></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="b-next" id="nextBtn" onclick="runNext()">Run next step</button>
+      <button class="b-auto" id="autoBtn" onclick="autoRun()">Auto-run &#9658;</button>
+      <button class="b-restart" onclick="restart()">Restart</button>
+    </div>
+    <div class="note"><b>Watch for:</b> purple <b>DECISION</b> cards (the agent asks YOU to choose), red <b>GUARDRAIL</b> cards (it needs a human's approval), and moments it <b>re-plans</b> after a problem. A good agent is powerful but always keeps a human in charge.</div>
+  </section>
+
+  <!-- HOW TO BUILD WITH CLAUDE -->
+  <section class="card">
+    <h2><span class="dot" style="background:var(--mint)"></span>Build an agent like this with Claude (step by step)</h2>
+    <p class="sub">You don't need to code. You can turn Claude into a task agent using a clear "job description". Here's the recipe:</p>
+    <ol class="steps">
+      <li><b>Plan it on paper first (the recipe):</b> write the <b>GOAL</b>, the <b>TOOLS</b> it can use (things it can ask you to look up or do), the <b>LOOP</b> (perceive -> plan -> act -> observe), and one <b>GUARDRAIL</b> (when it must ask a human).</li>
+      <li><b>Open Claude and start a Project</b> (or just a new chat). A Project lets you save the agent's instructions so you can reuse it.</li>
+      <li><b>Give Claude its "job description"</b> by pasting the prompt template below into the Project's custom instructions (or the first message). Fill in your goal, tools, and guardrail.</li>
+      <li><b>Run the agent:</b> tell it the goal. It will plan, then ask you for information (that's it "using a tool" - you play the tool and give it the answer, e.g. "the budget is $60").</li>
+      <li><b>Let it loop:</b> reply with results; it observes, adapts, and continues until the goal is met. When it hits the guardrail, it will pause and ask you to approve.</li>
+      <li><b>Level up:</b> ask Claude to "show the plan as a checklist", "track the budget", or even "make an HTML page that simulates this agent" - just like this one.</li>
+    </ol>
+    <p class="sub" style="margin-top:14px">Copy-paste prompt template (edit the parts in CAPS):</p>
+    <div class="promptbox" id="tpl">You are a helpful "Party Planner Agent". Your GOAL: PLAN A SURPRISE BIRTHDAY PARTY UNDER $60.
+
+Work in a loop:
+1) PERCEIVE - ask me for any info you need (one question at a time).
+2) PLAN - list the next steps as a short checklist.
+3) ACT - tell me which "tool" to run (e.g. "search venues", "check the budget") and wait for my answer.
+4) OBSERVE - use my answer, update the plan, and track the budget.
+Repeat until the goal is met.
+
+RULES / GUARDRAIL:
+- Never go over the budget. If a choice would, stop and suggest a cheaper option.
+- Before spending money or messaging people, PAUSE and ask me (a human) to approve.
+- Keep it safe and kind (check for allergies, get an adult's OK when needed).
+
+Start by asking me your first question.</div>
+    <div class="controls"><button class="b-auto" onclick="copyTpl()">Copy the template</button></div>
+    <div class="note"><b>Safety note for class:</b> these are pretend agents - Claude asks a human before anything real. Follow your school's rules and get guardian permission before students use AI tools.</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="dot" style="background:var(--amber)"></span>Teacher talking points</h2>
+    <ul class="tp">
+      <li><b>Real agents juggle many steps:</b> tools, a budget or goal, changing conditions, and re-planning - not just one answer.</li>
+      <li><b>Decisions show planning:</b> when the agent asks you to choose, that's it weighing options - the heart of "planning".</li>
+      <li><b>Guardrails keep humans in charge:</b> the red pauses are the most important part of a safe agent.</li>
+      <li><b>Same recipe every time:</b> goal + tools + loop + guardrail. Students can design (and prompt) their own.</li>
+    </ul>
+  </section>
+
+  <div class="foot">AI Essentials &middot; Week 5 advanced companion demo &middot; runs fully offline in your browser</div>
+</div>
+
+<script>
+"use strict";
+const SCEN = {
+  party: {
+    name:"Surprise party",
+    goal:"Plan a fun surprise birthday party for my friend, under $60",
+    subgoals:["Pick date & guests","Find a venue","Order food & cake","Plan activities","Send invites"],
+    meter:{label:"Budget left", value:60, max:60, prefix:"$", suffix:" left"},
+    beats:[
+      {stage:"perceive", text:"Check the birthday kid's free day and top interests.", tool:"survey()", res:"Free Saturday. Loves pizza, bowling, and dogs."},
+      {stage:"plan", text:"Draft plan: Saturday afternoon, 8 guests, pizza + cake + one fun activity.", progress:0},
+      {stage:"act", text:"Compare low-cost venue options.", tool:"searchVenues()", res:"Backyard: $0 - Community center: $20 - Bowling alley: $70"},
+      {decision:true, prompt:"Two venues fit the vibe - but watch the budget. Which should the agent pick?",
+        options:[
+          {label:"Backyard ($0) + a $15 mini bowling set", result:"Backyard it is. The agent adds a $15 mini bowling set so we still get to bowl."},
+          {label:"Bowling alley ($70)", result:"$70 breaks our $60 budget - the agent won't overspend, so it switches to the backyard + a $15 mini bowling set."}
+        ]},
+      {stage:"act", text:"Reserve the backyard and buy the mini bowling set.", tool:"book()", delta:-15, progress:1},
+      {stage:"act", text:"Order food within budget.", tool:"orderFood()", res:"2 pizzas $24 + cake $12 = $36", delta:-36, progress:2},
+      {stage:"observe", text:"Budget check: $51 spent, $9 left. Still on track."},
+      {stage:"plan", text:"Plan activities: mini bowling, a dog-photo booth, and a music playlist.", progress:3},
+      {guardrail:true, text:"Sending invites means messaging 8 families and spending the last $9 on favors. PAUSE and ask a parent to approve."},
+      {stage:"act", text:"Parent approved. Send invites and buy party favors.", tool:"sendInvites()", delta:-8, progress:4},
+      {stage:"observe", text:"All 8 friends RSVP yes. We're $1 under budget."},
+      {decision:true, prompt:"One guest is allergic to nuts. What should the agent do?",
+        options:[
+          {label:"Double-check the cake and snacks are nut-free", result:"Smart. The agent confirms the cake is nut-free and labels the snacks."},
+          {label:"Ignore it", result:"A safe agent never ignores this - it re-checks and confirms everything is nut-free."}
+        ]},
+      {done:true, text:"Surprise party planned - fun, safe, and $1 under budget!"}
+    ]
+  },
+  fundraiser: {
+    name:"Bake-sale fundraiser",
+    goal:"Raise $100 for the class trip with a bake sale",
+    subgoals:["Set goal & day","Plan the menu","Get approval & set up","Sell & adapt","Count the money"],
+    meter:{label:"Money raised", value:0, max:100, prefix:"$", suffix:" of $100"},
+    beats:[
+      {stage:"perceive", text:"Find out the target and the busiest day to sell.", tool:"checkFunds()", res:"Need $100. Friday after school is busiest.", progress:0},
+      {stage:"plan", text:"Plan to sell cookies and lemonade near the gym exit."},
+      {stage:"act", text:"Estimate supplies and prices.", tool:"planMenu()", res:"60 cookies at $1, 40 lemonades at $1.", progress:1},
+      {guardrail:true, text:"Selling at school and handling money needs a teacher's OK and a supervising adult. PAUSE and get approval."},
+      {stage:"act", text:"Teacher approved a table by the gym. Set up the stand.", progress:2},
+      {stage:"observe", text:"First hour: sold 30 cookies + 20 lemonades = $50 raised.", delta:50, progress:3},
+      {decision:true, prompt:"Sales are slowing. What should the agent try?",
+        options:[
+          {label:"Add a $1.50 combo and move to the busier front door", result:"Great call. A combo deal plus a busier spot lifts sales."},
+          {label:"Cut prices to 25 cents", result:"That sells out but barely raises money - the agent instead runs a combo deal in a busier spot."}
+        ]},
+      {stage:"observe", text:"Combo deal works: another $45 raised.", delta:45},
+      {stage:"observe", text:"A gust of wind spills a few cups - small setback, keep going."},
+      {stage:"act", text:"Cover the lemonade and sell the last cookies.", delta:10},
+      {stage:"observe", text:"Final count: $105 - goal beaten!", progress:4},
+      {done:true, text:"Fundraiser success: $105 for the class trip. You planned, adapted, and stayed safe."}
+    ]
+  },
+  tournament: {
+    name:"Game tournament",
+    goal:"Run a fair weekend video-game tournament for 8 friends",
+    subgoals:["Sign up players","Build the bracket","Schedule matches","Handle a problem","Crown a winner"],
+    meter:{label:"Players ready", value:0, max:8, prefix:"", suffix:" / 8"},
+    beats:[
+      {stage:"perceive", text:"Ask who's in and which game everyone owns.", tool:"poll()", res:"8 players; everyone has the same game."},
+      {stage:"act", text:"Confirm players as they sign up.", res:"8 of 8 signed up.", delta:8, progress:0},
+      {stage:"plan", text:"Build a single-elimination bracket for 8 players.", tool:"makeBracket()", progress:1},
+      {stage:"act", text:"Schedule Round 1: four matches, 20 minutes each.", tool:"schedule()", progress:2},
+      {guardrail:true, text:"It's a weekend event at someone's house. PAUSE and confirm an adult is home and okay with it."},
+      {stage:"observe", text:"Adult confirmed. Round 1 begins."},
+      {stage:"observe", text:"Problem: one player's controller breaks mid-match."},
+      {decision:true, prompt:"How should the agent handle the broken controller?",
+        options:[
+          {label:"Pause, lend a spare, and replay the match", result:"Fair and kind. The agent pauses, swaps in a spare controller, and replays."},
+          {label:"Make them forfeit", result:"That's unfair - the agent instead lends a spare controller and replays the match."}
+        ]},
+      {stage:"act", text:"Run Round 2 and the semifinals.", progress:3},
+      {stage:"observe", text:"Two players tie on time - the agent adds a 2-minute sudden-death round."},
+      {stage:"act", text:"Play the final with a live scoreboard.", tool:"scoreboard()"},
+      {stage:"observe", text:"We have a champion - and everyone had fun.", progress:4},
+      {done:true, text:"Tournament run fairly, safely, and on time. GG!"}
+    ]
+  }
+};
+const STAGE_LABEL={perceive:"PERCEIVE",plan:"PLAN",act:"ACT",observe:"OBSERVE",decision:"DECISION",guardrail:"GUARDRAIL",done:"DONE"};
+
+let cur=null, idx=0, waiting=false, autoTimer=null;
+
+function renderChips(){
+  document.getElementById('chips').innerHTML =
+    Object.keys(SCEN).map(k=>`<span class="chip" id="chip-${k}" onclick="pick('${k}')">${SCEN[k].name}</span>`).join('');
+}
+function pick(k){
+  stopAuto(); cur=k; idx=0; waiting=false;
+  const s=SCEN[k];
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  document.getElementById('chip-'+k).classList.add('active');
+  document.getElementById('goaltext').textContent=s.goal;
+  document.getElementById('checklist').innerHTML=s.subgoals.map((g,i)=>`<li id="sg-${i}">${g}</li>`).join('');
+  document.getElementById('feed').innerHTML='<div class="entry"><span style="color:var(--muted)">Press "Run next step" to start the agent.</span></div>';
+  highlight(null);
+  s._meter={...s.meter};
+  renderMeter();
+  document.getElementById('meterwrap').style.visibility='visible';
+  document.getElementById('nextBtn').disabled=false;
+  document.getElementById('autoBtn').disabled=false;
+}
+function renderMeter(){
+  const m=SCEN[cur]._meter;
+  document.getElementById('mlab').textContent=m.label;
+  document.getElementById('mval').textContent=m.prefix+m.value+m.suffix;
+  const pct=Math.max(0,Math.min(100,(m.value/m.max)*100));
+  const f=document.getElementById('mfill');
+  f.style.width=pct+"%";
+  // color: budget (down) turns amber/red as it drops; goal (up) greens as it fills
+  f.style.background = pct<25 ? "#F43F5E" : pct<60 ? "#F59E0B" : "#10B981";
+}
+function highlight(stage){
+  ['perceive','plan','act','observe'].forEach(s=>document.getElementById('n-'+s).classList.toggle('active', s===stage));
+}
+function addEntry(stageKey,text,tool,res){
+  const feed=document.getElementById('feed');
+  if(idx===1 && feed.children.length===1) feed.innerHTML='';
+  const e=document.createElement('div'); e.className='entry';
+  let html=`<span class="badge b-${stageKey}">${STAGE_LABEL[stageKey]}</span><div>${text}`;
+  if(tool) html+=`<span class="tool">&#128295; ${tool}${res?`<span class="res">&#8627; ${res}</span>`:''}</span>`;
+  html+='</div>';
+  e.innerHTML=html; feed.appendChild(e); feed.scrollTop=feed.scrollHeight;
+  return e;
+}
+function tick(i){ const li=document.getElementById('sg-'+i); if(li) li.classList.add('done'); }
+function meterDelta(d){ const m=SCEN[cur]._meter; m.value=Math.max(0,m.value+d); renderMeter(); }
+
+function runNext(){
+  if(cur===null){ alert("Pick a mission first."); return; }
+  if(waiting) return;
+  const beats=SCEN[cur].beats;
+  if(idx>=beats.length) return;
+  const b=beats[idx]; idx++;
+  if(b.decision){ renderAsk(b,false); waiting=true; return; }
+  if(b.guardrail){ renderAsk(b,true); waiting=true; return; }
+  if(b.done){ highlight(null); addEntry('done',b.text); finish(); return; }
+  highlight(b.stage);
+  addEntry(b.stage,b.text,b.tool,b.res);
+  if(b.progress!==undefined) tick(b.progress);
+  if(b.delta!==undefined) meterDelta(b.delta);
+}
+function renderAsk(b,isGuard){
+  const feed=document.getElementById('feed');
+  if(idx===1 && feed.children.length===1) feed.innerHTML='';
+  const box=document.createElement('div'); box.className='askbox'+(isGuard?' guard':'');
+  if(isGuard){
+    highlight(null);
+    box.innerHTML=`<div class="q"><span class="badge b-guardrail">GUARDRAIL</span> &nbsp;${b.text}</div>`;
+    const btn=document.createElement('button'); btn.className='b-approve'; btn.textContent='Approve (human says OK)';
+    btn.onclick=()=>{ box.querySelectorAll('button').forEach(x=>x.disabled=true);
+      const r=document.createElement('div'); r.className='resolved'; r.textContent='✓ A human approved. The agent continues.';
+      box.appendChild(r); waiting=false; };
+    box.appendChild(btn);
+  } else {
+    highlight('plan');
+    box.innerHTML=`<div class="q"><span class="badge b-decision">DECISION</span> &nbsp;${b.prompt}</div>`;
+    b.options.forEach(opt=>{
+      const btn=document.createElement('button'); btn.className='b-opt'; btn.textContent=opt.label;
+      btn.onclick=()=>{ box.querySelectorAll('button').forEach(x=>x.disabled=true);
+        const r=document.createElement('div'); r.className='resolved'; r.style.color='#4C1D95'; r.textContent='→ '+opt.result;
+        box.appendChild(r); waiting=false; };
+      box.appendChild(btn);
+    });
+  }
+  feed.appendChild(box); feed.scrollTop=feed.scrollHeight;
+}
+function finish(){ document.getElementById('nextBtn').disabled=true; document.getElementById('autoBtn').disabled=true; stopAuto(); }
+function autoRun(){
+  if(cur===null){ alert("Pick a mission first."); return; }
+  stopAuto();
+  autoTimer=setInterval(()=>{
+    if(cur===null || idx>=SCEN[cur].beats.length){ stopAuto(); return; }
+    if(!waiting) runNext(); // pauses automatically at decisions/guardrails until you click
+  },1200);
+}
+function stopAuto(){ if(autoTimer){clearInterval(autoTimer);autoTimer=null;} }
+function restart(){ if(cur!==null) pick(cur); }
+
+function copyTpl(){
+  const t=document.getElementById('tpl').innerText;
+  navigator.clipboard.writeText(t).then(()=>alert("Prompt template copied! Paste it into a Claude chat or Project."))
+    .catch(()=>alert("Select the template text and copy it manually."));
+}
+
+renderChips();
+</script>
+</body>
+</html>
