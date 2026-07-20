@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Essentials - Interactive Demos</title>
+<style>
+  :root{
+    --ink:#12123A; --primary:#4338CA; --accent:#06B6D4; --mint:#10B981;
+    --amber:#F59E0B; --coral:#F43F5E; --violet:#8B5CF6;
+    --light:#F4F5FB; --card:#FFFFFF; --text:#1F2937; --muted:#6B7280; --line:#E2E4F0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--light);color:var(--text);font-family:Calibri,'Segoe UI',system-ui,Arial,sans-serif;line-height:1.45}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px 18px 60px}
+  header.hero{background:var(--ink);color:#fff;border-radius:20px;padding:40px 36px;position:relative;overflow:hidden}
+  header.hero h1{margin:0 0 10px;font-family:'Trebuchet MS',sans-serif;font-size:36px}
+  header.hero p{margin:0;color:#C7CBE8;font-size:18px;max-width:780px}
+  .pill{display:inline-block;background:rgba(255,255,255,.12);color:#CFFAFE;font-size:12px;font-weight:bold;padding:6px 14px;border-radius:20px;margin-bottom:16px;letter-spacing:.6px}
+  .ring{position:absolute;border-radius:50%;opacity:.22}
+  .r1{width:280px;height:280px;background:var(--primary);right:-60px;top:-90px}
+  .r2{width:150px;height:150px;background:var(--accent);right:150px;top:110px;opacity:.28}
+  .r3{width:90px;height:90px;background:var(--mint);right:40px;bottom:-30px;opacity:.3}
+  .jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .jump a{background:#fff;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:bold;
+    font-size:13.5px;border-radius:20px;padding:8px 15px}
+  .jump a:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+  h2.sec{font-family:'Trebuchet MS',sans-serif;color:var(--ink);font-size:20px;margin:34px 4px 0;
+    display:flex;align-items:center;gap:10px}
+  h2.sec .bar{width:12px;height:22px;border-radius:4px;display:inline-block}
+  p.secsub{margin:4px 4px 0;color:var(--muted);font-size:14.5px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-top:14px}
+  a.demo{display:block;text-decoration:none;color:inherit;background:var(--card);border-radius:16px;
+    padding:22px 22px 20px;box-shadow:0 6px 22px rgba(31,41,55,.07);border-top:5px solid var(--primary);
+    transition:transform .14s, box-shadow .14s}
+  a.demo:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(31,41,55,.14)}
+  a.demo .tag{display:inline-block;font-size:11px;font-weight:bold;letter-spacing:.5px;color:#fff;
+    border-radius:6px;padding:3px 9px;margin-bottom:12px}
+  a.demo h3{font-family:'Trebuchet MS',sans-serif;color:var(--ink);font-size:19px;margin:0 0 6px}
+  a.demo p{margin:0 0 12px;color:#4B5563;font-size:14.5px}
+  a.demo .try{font-size:13px;color:var(--muted);margin:0 0 12px;border-left:3px solid var(--line);padding-left:9px}
+  a.demo .go{font-weight:bold;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+  .c-primary{border-top-color:var(--primary)} .t-primary{background:var(--primary)} .g-primary{color:var(--primary)}
+  .c-accent{border-top-color:var(--accent)} .t-accent{background:var(--accent)} .g-accent{color:#0891A8}
+  .c-violet{border-top-color:var(--violet)} .t-violet{background:var(--violet)} .g-violet{color:var(--violet)}
+  .c-mint{border-top-color:var(--mint)} .t-mint{background:var(--mint)} .g-mint{color:#0B8A5F}
+  .note{background:#fff;border:1px solid var(--line);border-left:4px solid var(--mint);border-radius:12px;
+    padding:16px 18px;font-size:14.5px;margin-top:30px}
+  .note ul{margin:8px 0 0;padding-left:20px} .note li{margin:5px 0}
+  .foot{color:var(--muted);font-size:13px;text-align:center;margin-top:30px}
+  @media(max-width:560px){header.hero{padding:30px 24px}header.hero h1{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+    <span class="pill">AI ESSENTIALS &middot; HIGH SCHOOL COURSE</span>
+    <h1>Interactive AI Demos</h1>
+    <p>Six hands-on demos that show how AI actually works - how it learns from data, predicts words, sees pictures, and acts like an agent. Everything runs right in your browser, with nothing to install and no sign-in. Pick one and start playing!</p>
+  </header>
+
+  <div class="jump">
+    <a href="#w2">Week 2 &middot; Machine Learning</a>
+    <a href="#w3">Week 3 &middot; Generative AI</a>
+    <a href="#w4">Week 4 &middot; Vision AI</a>
+    <a href="#w5">Week 5 &middot; AI Agents</a>
+  </div>
+
+  <h2 class="sec" id="w2"><span class="bar" style="background:var(--mint)"></span>Week 2 &middot; Machine Learning</h2>
+  <p class="secsub">How AI learns patterns from data - and the three jobs it does with them.</p>
+  <div class="grid">
+    <a class="demo c-mint" href="ml-demos-v2-week2.html">
+      <span class="tag t-mint">3 DEMOS IN ONE</span>
+      <h3>Machine Learning in Your Daily Life</h3>
+      <p>Explore regression, classification, and clustering with real examples - TikTok views, gaming scores, run times and more.</p>
+      <p class="try">Try: add your own data points and watch the line, the boundary, and the groups move.</p>
+      <span class="go g-mint">Open demo &#8594;</span>
+    </a>
+  </div>
+
+  <h2 class="sec" id="w3"><span class="bar" style="background:var(--violet)"></span>Week 3 &middot; Generative AI</h2>
+  <p class="secsub">How AI creates text - and how to talk to it so you get great results.</p>
+  <div class="grid">
+    <a class="demo c-violet" href="LLM_NextWord_Demo.html">
+      <span class="tag t-violet">LANGUAGE MODELS</span>
+      <h3>How AI Predicts the Next Word</h3>
+      <p>Build a sentence one word at a time and watch the probability bars - you become the language model.</p>
+      <p class="try">Try: train it on your own 10 sentences, then see how its predictions change.</p>
+      <span class="go g-violet">Open demo &#8594;</span>
+    </a>
+    <a class="demo c-violet" href="Prompt_Makeover_Demo.html">
+      <span class="tag t-violet">PROMPTING</span>
+      <h3>Prompt Makeover: Weak &#8594; Excellent</h3>
+      <p>Watch a weak prompt improve step by step into an excellent one, using the 5 ingredients of a great prompt.</p>
+      <p class="try">Try: paste one of your own prompts and see what score it gets.</p>
+      <span class="go g-violet">Open demo &#8594;</span>
+    </a>
+  </div>
+
+  <h2 class="sec" id="w4"><span class="bar" style="background:var(--accent)"></span>Week 4 &middot; Vision AI</h2>
+  <p class="secsub">How computers "see" - starting with the idea that a picture is just numbers.</p>
+  <div class="grid">
+    <a class="demo c-accent" href="Vision_Pixel_Classifier_Demo.html">
+      <span class="tag t-accent">DRAW &amp; CLASSIFY</span>
+      <h3>Draw a Letter, Watch AI Guess</h3>
+      <p>Draw any capital letter A-Z on a pixel grid and watch the AI center it, compare it to all 26 letters, and rank its top 3 guesses.</p>
+      <p class="try">Try: draw an O, then a Q - and see why AI mixes up look-alikes.</p>
+      <span class="go g-accent">Open demo &#8594;</span>
+    </a>
+  </div>
+
+  <h2 class="sec" id="w5"><span class="bar" style="background:var(--primary)"></span>Week 5 &middot; AI Agents</h2>
+  <p class="secsub">AI that doesn't just answer - it plans, uses tools, and takes action toward a goal.</p>
+  <div class="grid">
+    <a class="demo c-primary" href="Agent_Loop_Simulator_Demo.html">
+      <span class="tag t-primary">START HERE</span>
+      <h3>AI Agent Loop Simulator</h3>
+      <p>Step an agent through Perceive &#8594; Plan &#8594; Act &#8594; Observe on a real goal, complete with an obstacle and a human guardrail.</p>
+      <p class="try">Try: hit the obstacle and watch the agent re-plan instead of giving up.</p>
+      <span class="go g-primary">Open demo &#8594;</span>
+    </a>
+    <a class="demo c-primary" href="Agent_ControlRoom_Demo.html">
+      <span class="tag t-primary">ADVANCED</span>
+      <h3>AI Agent Control Room</h3>
+      <p>Run a bigger agent mission - plan a party, a fundraiser, or a tournament - with tools, a budget meter, your decisions, and guardrails.</p>
+      <p class="try">Try: let the budget run low and see which guardrail stops the agent.</p>
+      <span class="go g-primary">Open demo &#8594;</span>
+    </a>
+  </div>
+
+  <div class="note"><b>For teachers &amp; parents:</b>
+    <ul>
+      <li>Every demo runs <b>fully offline</b> in the browser - no logins, no accounts, no data collected.</li>
+      <li>Each page has built-in <b>talking points</b> and a suggested class demo, plus a "peek under the hood" explainer.</li>
+      <li>Every page links back here, so students can hop between demos with one click.</li>
+      <li>Tip: bookmark this page and share <b>only this link</b> - it's the single starting point for the whole course.</li>
+    </ul>
+  </div>
+
+  <div class="foot">AI Essentials &middot; a 5-week (+ build week) introduction to AI for high-school students</div>
+</div>
+</body>
+</html>

@@ -60,10 +60,17 @@
   ul.tp{margin:6px 0 0;padding-left:22px} ul.tp li{margin:7px 0;font-size:15px}
   .foot{color:var(--muted);font-size:13px;text-align:center;margin-top:26px}
   @media(max-width:620px){.node{width:46%}}
+  a.back{color:var(--primary);font-weight:bold;text-decoration:none;font-size:14px}
+  a.back:hover{text-decoration:underline}
+  .backfoot{text-align:center;margin-top:22px}
+  .backfoot a{display:inline-block;background:#E7E9F5;color:var(--ink);font-weight:bold;font-size:14px;text-decoration:none;border-radius:10px;padding:10px 18px}
+  .backfoot a:hover{background:var(--primary);color:#fff}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <p style="margin:0 0 10px"><a class="back" href="index.html">&#8592; All demos</a></p>
+
 
   <header class="hero">
     <span class="ring r1"></span><span class="ring r2"></span>
@@ -209,7 +216,9 @@ function nextStep(){
   if(idx===1) log.innerHTML='';
   const tool=b.tool?`<span class="tool">${b.tool}</span>`:'';
   const e=document.createElement('div'); e.className='entry';
-  e.innerHTML=`<span class="badge b-${b.s}">${STAGE_LABEL[b.s]}</span><div>${b.t}${tool}</div>`;
+  e.innerHTML=`<span class="badge b-${b.s}">${STAGE_LABEL[b.s]}</span><div>${b.t}${tool}
+  <div class="backfoot"><a href="index.html">&#8592; Back to all demos</a></div>
+</div>`;
   log.appendChild(e); log.scrollTop=log.scrollHeight;
   // progress
   if(b.done!==undefined){ const li=document.getElementById('sg-'+b.done); if(li) li.classList.add('done'); }

@@ -81,10 +81,17 @@
     .candidate .w{width:80px;font-size:16px} .candidate .cnt{display:none}
     header.hero h1{font-size:24px}
   }
+  a.back{color:var(--primary);font-weight:bold;text-decoration:none;font-size:14px}
+  a.back:hover{text-decoration:underline}
+  .backfoot{text-align:center;margin-top:22px}
+  .backfoot a{display:inline-block;background:#E7E9F5;color:var(--ink);font-weight:bold;font-size:14px;text-decoration:none;border-radius:10px;padding:10px 18px}
+  .backfoot a:hover{background:var(--primary);color:#fff}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <p style="margin:0 0 10px"><a class="back" href="index.html">&#8592; All demos</a></p>
+
 
   <header class="hero">
     <span class="ring r1"></span><span class="ring r2"></span>
@@ -265,7 +272,9 @@ function render(){
   const lines = r.dist.slice(0,6).map(([w,c])=>`<code>${w===END?'[end]':w}</code> &times;${c}`).join(' &nbsp; ');
   hood.innerHTML = `It looked at <b>${r.level}</b>: <code>${r.ctx}</code>.<br>`+
     `In the training text, these words came next:<br><div style="margin-top:6px">${lines}</div>`+
-    `<div style="margin-top:8px;color:var(--muted)">It turns those counts into percentages (the bars). "Add top word" picks the biggest; "Surprise me" rolls a weighted dice.</div>`;
+    `<div style="margin-top:8px;color:var(--muted)">It turns those counts into percentages (the bars). "Add top word" picks the biggest; "Surprise me" rolls a weighted dice.
+  <div class="backfoot"><a href="index.html">&#8592; Back to all demos</a></div>
+</div>`;
 }
 
 function tempValue(){ return document.getElementById('temp').value/100; }
